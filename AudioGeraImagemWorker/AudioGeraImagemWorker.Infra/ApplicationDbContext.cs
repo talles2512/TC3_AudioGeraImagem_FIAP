@@ -8,7 +8,6 @@ namespace AudioGeraImagemWorker.Infra
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-
         }
 
         public DbSet<Comando> Comandos { get; set; }

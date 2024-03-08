@@ -9,8 +9,7 @@ namespace AudioGeraImagemWorker.Worker.Configurations
         {
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                //options.UseSqlServer(configuration.GetConnectionString("DbConnectionString"));
-                options.UseInMemoryDatabase("dbmemory");
+                options.UseSqlServer(configuration.GetConnectionString("ApplicationConnectionString"));
             });
         }
     }

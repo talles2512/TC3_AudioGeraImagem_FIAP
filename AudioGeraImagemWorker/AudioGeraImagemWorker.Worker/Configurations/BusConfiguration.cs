@@ -1,10 +1,5 @@
 ﻿using AudioGeraImagemWorker.Worker.Events;
 using MassTransit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AudioGeraImagemWorker.Worker.Configurations
 {
@@ -17,9 +12,9 @@ namespace AudioGeraImagemWorker.Worker.Configurations
             var usuario = configuration.GetSection("MassTransit")["Usuario"] ?? string.Empty;
             var senha = configuration.GetSection("MassTransit")["Senha"] ?? string.Empty;
 
-            services.AddMassTransit(config =>
+            services.AddMassTransit(x =>
             {
-                config.UsingRabbitMq((context, cfg) =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(servidor, "/", h =>
                     {
@@ -29,13 +24,13 @@ namespace AudioGeraImagemWorker.Worker.Configurations
 
                     cfg.ReceiveEndpoint(fila, e =>
                     {
-                        e.Consumer<ComandoConsumer>();
+                        e.ConfigureConsumer<ComandoConsumer>(context);
                     });
 
                     cfg.ConfigureEndpoints(context);
                 });
 
-                config.AddConsumer<ComandoConsumer>();
+                x.AddConsumer<ComandoConsumer>();
             });
         }
     }

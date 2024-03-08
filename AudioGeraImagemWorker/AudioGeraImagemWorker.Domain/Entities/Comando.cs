@@ -1,7 +1,4 @@
-﻿using AudioGeraImagemWorker.Domain.Enums;
-using System.Text.Json.Serialization;
-
-namespace AudioGeraImagemWorker.Domain.Entities
+﻿namespace AudioGeraImagemWorker.Domain.Entities
 {
     public class Comando : EntidadeBase
     {

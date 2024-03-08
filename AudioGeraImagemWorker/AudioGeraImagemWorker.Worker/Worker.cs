@@ -14,6 +14,9 @@ namespace AudioGeraImagemWorker.Worker
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+
+                Console.WriteLine("Rodando...");
+
                 await Task.Delay(1000, stoppingToken);
             }
         }

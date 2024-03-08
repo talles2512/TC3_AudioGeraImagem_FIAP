@@ -4,27 +4,27 @@ using AudioGeraImagemWorker.Domain.Interfaces;
 using AudioGeraImagemWorker.Domain.Interfaces.Repositories;
 using AudioGeraImagemWorker.Domain.Interfaces.Vendor;
 using MassTransit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AudioGeraImagemWorker.Domain.Services
 {
     public class ComandoManager : IComandoManager
     {
-        readonly IComandoRepository _comandoRepository;
-        readonly IErroManager _erroManager;
-        readonly IBucketManager _bucketManager;
-        readonly IOpenAIVendor _openAIVendor;
-        readonly IBus _bus;
+        private readonly IComandoRepository _comandoRepository;
+        private readonly IErroManager _erroManager;
+        private readonly IBucketManager _bucketManager;
+        private readonly IOpenAIVendor _openAIVendor;
+        private readonly IBus _bus;
 
-        public ComandoManager(IComandoRepository comandoRepository, IErroManager erroManager, IBucketManager bucketManager, IBus bus)
+        public ComandoManager(IComandoRepository comandoRepository,
+                              IErroManager erroManager,
+                              IBucketManager bucketManager,
+                              IOpenAIVendor openAIVendor,
+                              IBus bus)
         {
             _comandoRepository = comandoRepository;
             _erroManager = erroManager;
             _bucketManager = bucketManager;
+            _openAIVendor = openAIVendor;
             _bus = bus;
         }
 
@@ -66,6 +66,7 @@ namespace AudioGeraImagemWorker.Domain.Services
                 case EstadoComando.Recebido:
                     novoEstadoComando = EstadoComando.SalvandoAudio;
                     break;
+
                 case EstadoComando.SalvandoAudio:
                     novoEstadoComando = EstadoComando.GerandoTexto;
                     break;
@@ -102,7 +103,6 @@ namespace AudioGeraImagemWorker.Domain.Services
 
         private async Task GerarTexto(Comando comando)
         {
-
         }
     }
 }

@@ -1,11 +1,6 @@
 ﻿using AudioGeraImagemWorker.Application.Interfaces;
 using AudioGeraImagemWorker.Domain.Entities;
 using AudioGeraImagemWorker.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AudioGeraImagemWorker.Application.Services
 {
