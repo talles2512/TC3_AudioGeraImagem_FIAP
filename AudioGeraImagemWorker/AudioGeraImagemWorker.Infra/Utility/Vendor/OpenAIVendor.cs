@@ -2,6 +2,7 @@
 using AudioGeraImagemWorker.Domain.Entities.Response;
 using AudioGeraImagemWorker.Domain.Interfaces.Vendor;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace AudioGeraImagemWorker.Infra.Utility.Vendor
@@ -10,70 +11,90 @@ namespace AudioGeraImagemWorker.Infra.Utility.Vendor
     {
         private readonly HttpHelp _httpHelp;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<BucketManager> _logger;
+        private readonly string _className = typeof(BucketManager).Name;
 
         public OpenAIVendor(HttpHelp httpHelp,
-                            IConfiguration configuration)
+                            IConfiguration configuration,
+                            ILogger<BucketManager> logger)
         {
             _httpHelp = httpHelp;
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task<Tuple<GerarImagemResponse, string>> GerarImagem(GerarImagemRequest request)
         {
-            var json = JsonSerializer.Serialize(request);
-            var url = _configuration.GetSection("OpenAI")["GenerateImageEndpoint"];
-            var secret = _configuration.GetSection("OpenAI")["APIKey"];
-            Dictionary<string, string> Dicheaders = new Dictionary<string, string>();
-
-            //Add Headers
-            Dicheaders = AddHeaders(Dicheaders, "Authorization", $"Bearer {secret}");
-
-            //Integração externa API OpenAI - Utilitario
-            var result = await _httpHelp.Send(url, json, VerboHttp.Post, Dicheaders, null);
-
-            if (result.Code.ToString() == "Success")
+            try
             {
-                var response = JsonSerializer.Deserialize<GerarImagemResponse>(result.Received);
-                return new Tuple<GerarImagemResponse, string>(response, "");
+                var json = JsonSerializer.Serialize(request);
+                var url = _configuration.GetSection("OpenAI")["GenerateImageEndpoint"];
+                var secret = _configuration.GetSection("OpenAI")["APIKey"];
+                Dictionary<string, string> Dicheaders = new Dictionary<string, string>();
+
+                //Add Headers
+                Dicheaders = AddHeaders(Dicheaders, "Authorization", $"Bearer {secret}");
+
+                //Integração externa API OpenAI - Utilitario
+                var result = await _httpHelp.Send(url, json, VerboHttp.Post, Dicheaders, null);
+
+                if (result.Code.ToString() == "Success")
+                {
+                    var response = JsonSerializer.Deserialize<GerarImagemResponse>(result.Received);
+                    return new Tuple<GerarImagemResponse, string>(response, "");
+                }
+                else
+                {
+                    var response = JsonSerializer.Deserialize<ErrorResponse>(result.Received);
+                    return new Tuple<GerarImagemResponse, string>(null, response.error.message);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var response = JsonSerializer.Deserialize<ErrorResponse>(result.Received);
-                return new Tuple<GerarImagemResponse, string>(null, response.error.message);
+                _logger.LogError($"[{_className}] - [GerarImagem] => Exception.: {ex.Message}");
+                return new Tuple<GerarImagemResponse, string>(null, "Exception");
             }
         }
 
         public async Task<Tuple<TranscricaoResponse, string>> Transcricao(TranscricaoRequest request)
         {
-            var url = _configuration.GetSection("OpenAI")["TranscriptionEndpoint"];
-            var secret = _configuration.GetSection("OpenAI")["APIKey"];
+            try
+            {
+                var url = _configuration.GetSection("OpenAI")["TranscriptionEndpoint"];
+                var secret = _configuration.GetSection("OpenAI")["APIKey"];
 
-            var multiPartContent = new MultipartFormDataContent
+                var multiPartContent = new MultipartFormDataContent
             {
                // Adicionando parâmetros de texto:
-               { new StringContent(request.model), "model" },
-               { new StringContent(request.response_format), "response_format" }
+               { new StringContent(request.model), "model" }
+               //{ new StringContent(request.response_format), "response_format" }
             };
 
-            var arquivoContent = new ByteArrayContent(request.bytes);
-            multiPartContent.Add(arquivoContent, "file", $"{request.filename}");
+                var arquivoContent = new ByteArrayContent(request.bytes);
+                multiPartContent.Add(arquivoContent, "file", $"{request.filename}");
 
-            Dictionary<string, string> Dicheaders = new Dictionary<string, string>();
-            //Add Headers
-            Dicheaders = AddHeaders(Dicheaders, "Authorization", $"Bearer {secret}");
+                Dictionary<string, string> Dicheaders = new Dictionary<string, string>();
+                //Add Headers
+                Dicheaders = AddHeaders(Dicheaders, "Authorization", $"Bearer {secret}");
 
-            //Integração externa API OpenAI - Utilitario
-            var result = await _httpHelp.Send(url, "", VerboHttp.Post, Dicheaders, multiPartContent);
+                //Integração externa API OpenAI - Utilitario
+                var result = await _httpHelp.Send(url, "", VerboHttp.Post, Dicheaders, multiPartContent);
 
-            if (result.Code.ToString() == "Success")
-            {
-                var response = JsonSerializer.Deserialize<TranscricaoResponse>(result.Received);
-                return new Tuple<TranscricaoResponse, string>(response, "");
+                if (result.Code.ToString() == "Success")
+                {
+                    var response = JsonSerializer.Deserialize<TranscricaoResponse>(result.Received);
+                    return new Tuple<TranscricaoResponse, string>(response, "");
+                }
+                else
+                {
+                    var response = JsonSerializer.Deserialize<ErrorResponse>(result.Received);
+                    return new Tuple<TranscricaoResponse, string>(null, response.error.message);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var response = JsonSerializer.Deserialize<ErrorResponse>(result.Received);
-                return new Tuple<TranscricaoResponse, string>(null, response.error.message);
+                _logger.LogError($"[{_className}] - [Transcricao] => Exception.: {ex.Message}");
+                return new Tuple<TranscricaoResponse, string>(null, "Exception");
             }
         }
 

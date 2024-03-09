@@ -14,6 +14,13 @@ namespace AudioGeraImagemWorker.Infra.Configurations
                 .HasColumnType("DATETIME");
             builder.Property(x => x.InstanteAtualizacao)
                 .HasColumnType("DATETIME");
+            //Acho que é isso - Dps verificar kkk
+            builder.Property(x => x.UrlAudio)
+                .HasColumnType("VARCHAR(MAX)");
+            builder.Property(x => x.TextoProcessado)
+                .HasColumnType("VARCHAR(MAX)");
+            builder.Property(x => x.UrlImagem)
+                .HasColumnType("VARCHAR(MAX)");
 
             builder.OwnsMany(x => x.ProcessamentosComandos, procesamentoComando =>
             {
