@@ -65,6 +65,10 @@ namespace AudioGeraImagemWorker.Domain.Services
                     case EstadoComando.SalvadoImagem:
                         await SalvarImagem(comando);
                         break;
+
+                    case EstadoComando.Finalizado:
+                        await Finalizar(comando);
+                        break;
                 }
 
                 await ProcessarComando(comando);
@@ -73,6 +77,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             {
                 _logger.LogError($"[{_className}] - [ProcessarComando] => Exception.: {ex.Message}");
                 novoProcessamentoComando.MensagemErro = ex.Message;
+                comando.ProcessamentosComandos.Add(novoProcessamentoComando);
                 await _erroManager.TratarErro(comando);
             }
         }
@@ -124,7 +129,8 @@ namespace AudioGeraImagemWorker.Domain.Services
             var novoProcessamentoComando = new ProcessamentoComando()
             {
                 Estado = novoEstado,
-                InstanteCriacao = DateTime.Now
+                InstanteCriacao = DateTime.Now,
+                Tentativa = 0 //Toda vez que receber um novo comando zeramos a tentativa.
             };
 
             comando.ProcessamentosComandos.Add(novoProcessamentoComando);
@@ -132,6 +138,9 @@ namespace AudioGeraImagemWorker.Domain.Services
             return novoProcessamentoComando;
         }
 
+        #region [ Tratamentos dos Estados dos Comandos ]
+
+        // 1. Estado Recebido >> Salvando Audio
         private async Task SalvarAudio(Comando comando)
         {
             try
@@ -155,6 +164,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             }   
         }
 
+        // 2. Salvando Audio >> Gerando Texto
         private async Task GerarTexto(Comando comando)
         {
             try
@@ -181,6 +191,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             }
         }
 
+        // 3. Gerando Texto >> Salvando Texto
         private async Task SalvarTexto(Comando comando)
         {
             try
@@ -193,6 +204,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             }
         }
 
+        // 4. Salvando Texto >> Gerando Imagem
         private async Task GerarImagem(Comando comando)
         {
             try
@@ -218,6 +230,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             }
         }
 
+        // 5. Gerando Imagem >> Salvado Imagem
         private async Task SalvarImagem(Comando comando)
         {
             try
@@ -254,5 +267,20 @@ namespace AudioGeraImagemWorker.Domain.Services
                 _logger.LogError($"[{_className}] - [SalvarImagem] => Exception.: {ex.Message}");
             }
         }
+
+        // 6. Salvando Imagem >> Finalizado
+        private async Task Finalizar(Comando comando)
+        {
+            try
+            {
+                await _comandoRepository.Atualizar(comando);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[{_className}] - [Finalizar] => Exception.: {ex.Message}");
+            }
+        }
+
+        #endregion
     }
 }

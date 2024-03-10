@@ -14,11 +14,20 @@ namespace AudioGeraImagemWorker.Worker
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-
-                Console.WriteLine("Rodando...");
-
                 await Task.Delay(1000, stoppingToken);
             }
+        }
+
+        public override Task StopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Worker stopping: {time}", DateTimeOffset.Now);
+            return base.StopAsync(cancellationToken);
+        }
+
+        public override void Dispose()
+        {
+            _logger.LogInformation("Worker disposed: {time}", DateTimeOffset.Now);
+            base.Dispose();
         }
     }
 }
