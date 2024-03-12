@@ -2,8 +2,6 @@
 {
     public interface IBucketManager
     {
-        Task<string> ArmazenarAudio(byte[] bytes);
-
-        Task<string> ArmazenarImagem(byte[] bytes);
+        Task<string> ArmazenarObjeto(byte[] bytes, string blobName);
     }
 }

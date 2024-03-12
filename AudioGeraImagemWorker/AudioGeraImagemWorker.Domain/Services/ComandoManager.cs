@@ -5,7 +5,6 @@ using AudioGeraImagemWorker.Domain.Factories;
 using AudioGeraImagemWorker.Domain.Interfaces;
 using AudioGeraImagemWorker.Domain.Interfaces.Repositories;
 using AudioGeraImagemWorker.Domain.Interfaces.Vendor;
-using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -136,7 +135,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             try
             {
                 var bytes = comando.Payload;
-                var urlAudio = await _bucketManager.ArmazenarAudio(bytes);
+                var urlAudio = await _bucketManager.ArmazenarObjeto(bytes, string.Concat(comando.Id.ToString(), ".mp3"));
                 if (string.IsNullOrEmpty(urlAudio))
                 {
                     _logger.LogError($"[{_className}] - [SalvarAudio] => Exception.: Falha no armazenamento do audio no Azure Blob Storage");
@@ -230,29 +229,10 @@ namespace AudioGeraImagemWorker.Domain.Services
             try
             {
                 using HttpClient httpClient = new HttpClient();
-                HttpResponseMessage response = await httpClient.GetAsync(comando.UrlImagem);
+                var bytes = await httpClient.GetByteArrayAsync(comando.UrlAudio);
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    throw new Exception($"Falha no download da imagem da URL do Blob. Status code: {response.StatusCode}");
-                }
-
-                using MemoryStream memoryStream = new MemoryStream();
-                await response.Content.CopyToAsync(memoryStream);
-                var bytes = memoryStream.ToArray();
-                var urlImagem = await _bucketManager.ArmazenarImagem(bytes);
-                if (string.IsNullOrEmpty(urlImagem))
-                {
-                    _logger.LogError($"[{_className}] - [SalvarImagem] => Exception.: Falha no armazenamento da imagem no Azure Blob Storage");
-                }
-                else
-                {
-                    comando.UrlImagem = urlImagem;
-                    //Salvando URL do Blob do Audio
-                    await _comandoRepository.Atualizar(comando);
-                }
-
-
+                var urlImagem = await _bucketManager.ArmazenarObjeto(bytes, string.Concat(comando.Id.ToString(), ".jpeg"));
+                comando.UrlImagem = urlImagem;
 
                 await _comandoRepository.Atualizar(comando);
             }

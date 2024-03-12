@@ -2,76 +2,37 @@
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 
 namespace AudioGeraImagemWorker.Infra.Utility.Vendor
 {
     public class BucketManager : IBucketManager
     {
-        private readonly IConfiguration _configuration;
-        private readonly ILogger<BucketManager> _logger;
-        private readonly string _className = typeof(BucketManager).Name;
+        private readonly string containerName;
+        private readonly string connectionString;
 
-        public BucketManager(IConfiguration configuration,
-                             ILogger<BucketManager> logger)
+        public BucketManager(IConfiguration configuration)
         {
-            _configuration = configuration;
-            _logger = logger;
+            containerName = configuration.GetSection("AzureBlobConfiguration")["ContainerName"] ?? string.Empty;
+            connectionString = configuration.GetSection("AzureBlobConfiguration")["ConnectionString"] ?? string.Empty;
         }
 
-        public async Task<string> ArmazenarAudio(byte[] bytes)
+        private async Task<BlobClient> GetBlobClient(string blobName)
         {
-            try
-            {
-                var container = _configuration.GetSection("AzureBlobConfiguration")["AudioContainerName"] ?? string.Empty;
-                var strConn = _configuration.GetSection("AzureBlobConfiguration")["ConnectionString"] ?? string.Empty;
-                var blobName = _configuration.GetSection("AzureBlobConfiguration")["BlobName"] ?? string.Empty;
+            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            await containerClient.CreateIfNotExistsAsync();
 
-                BlobServiceClient blobServiceClient = new BlobServiceClient(strConn);
-                BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(container);
-                await containerClient.CreateIfNotExistsAsync();
-
-                BlobClient blobClient = containerClient.GetBlobClient(blobName);
-
-                using (MemoryStream stream = new MemoryStream(bytes))
-                {
-                    await blobClient.UploadAsync(stream, true);
-                }
-
-                return blobClient.Uri.ToString();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"[{_className}] - [ArmazenarAudio] => Exception.: {ex.Message}");
-                return null;
-            }
+            return containerClient.GetBlobClient(blobName);
         }
 
-        public async Task<string> ArmazenarImagem(byte[] bytes)
+        public async Task<string> ArmazenarObjeto(byte[] bytes, string blobName)
         {
-            try
-            {
-                var container = _configuration.GetSection("AzureBlobConfiguration")["ImageContainerName"] ?? string.Empty;
-                var strConn = _configuration.GetSection("AzureBlobConfiguration")["ConnectionString"] ?? string.Empty;
-                var blobName = _configuration.GetSection("AzureBlobConfiguration")["BlobName"] ?? string.Empty;
+            var blobClient = await GetBlobClient(blobName);
 
-                BlobServiceClient blobServiceClient = new BlobServiceClient(strConn);
-                BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(container);
-                await containerClient.CreateIfNotExistsAsync();
+            await blobClient.UploadAsync(BinaryData.FromBytes(bytes));
 
-                BlobClient blobClient = containerClient.GetBlobClient(blobName);
-
-                using (MemoryStream stream = new MemoryStream(bytes))
-                {
-                    await blobClient.UploadAsync(stream, true);
-                }
-
-                return blobClient.Uri.ToString();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"[{_className}] - [ArmazenarAudio] => Exception.: {ex.Message}");
-                return null;
-            }
+            return blobClient.Uri.ToString();
         }
     }
 }
