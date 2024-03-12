@@ -9,6 +9,5 @@ namespace AudioGeraImagemWorker.Domain.Entities
         public EstadoComando Estado { get; set; }
         public DateTime InstanteCriacao { get; set; }
         public string MensagemErro { get; set; }
-        public int Tentativa { get; set; }
     }
 }

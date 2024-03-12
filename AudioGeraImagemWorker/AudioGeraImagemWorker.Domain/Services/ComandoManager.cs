@@ -1,6 +1,7 @@
 ﻿using AudioGeraImagemWorker.Domain.Entities;
 using AudioGeraImagemWorker.Domain.Entities.Request;
 using AudioGeraImagemWorker.Domain.Enums;
+using AudioGeraImagemWorker.Domain.Factories;
 using AudioGeraImagemWorker.Domain.Interfaces;
 using AudioGeraImagemWorker.Domain.Interfaces.Repositories;
 using AudioGeraImagemWorker.Domain.Interfaces.Vendor;
@@ -16,7 +17,7 @@ namespace AudioGeraImagemWorker.Domain.Services
         private readonly IErroManager _erroManager;
         private readonly IBucketManager _bucketManager;
         private readonly IOpenAIVendor _openAIVendor;
-        private readonly IBus _bus;
+
         private readonly IConfiguration _configuration;
         private readonly ILogger<ComandoManager> _logger;
         private readonly string _className = typeof(ComandoManager).Name;
@@ -25,7 +26,6 @@ namespace AudioGeraImagemWorker.Domain.Services
                               IErroManager erroManager,
                               IBucketManager bucketManager,
                               IOpenAIVendor openAIVendor,
-                              IBus bus,
                               IConfiguration configuration,
                               ILogger<ComandoManager> logger)
         {
@@ -33,18 +33,23 @@ namespace AudioGeraImagemWorker.Domain.Services
             _erroManager = erroManager;
             _bucketManager = bucketManager;
             _openAIVendor = openAIVendor;
-            _bus = bus;
             _configuration = configuration;
             _logger = logger;
         }
 
         public async Task ProcessarComando(Comando comando)
         {
-            var novoProcessamentoComando = await AtualizarProcessamentoComando(comando);
+            await AtualizarProcessamentoComando(comando);
+            await ExecutarComando(comando);
+        }
+
+        public async Task ExecutarComando(Comando comando)
+        {
+            var ultimoProcessamento = comando.ProcessamentosComandos.LastOrDefault();
 
             try
             {
-                switch (novoProcessamentoComando.Estado)
+                switch (ultimoProcessamento.Estado)
                 {
                     case EstadoComando.SalvandoAudio:
                         await SalvarAudio(comando);
@@ -68,21 +73,20 @@ namespace AudioGeraImagemWorker.Domain.Services
 
                     case EstadoComando.Finalizado:
                         await Finalizar(comando);
-                        break;
+                        return;
                 }
 
-                await ProcessarComando(comando);
+                await AtualizarProcessamentoComando(comando);
+                await ExecutarComando(comando);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"[{_className}] - [ProcessarComando] => Exception.: {ex.Message}");
-                novoProcessamentoComando.MensagemErro = ex.Message;
-                comando.ProcessamentosComandos.Add(novoProcessamentoComando);
-                await _erroManager.TratarErro(comando);
+                ultimoProcessamento.MensagemErro = ex.Message;
+                await _erroManager.TratarErro(comando, ultimoProcessamento.Estado);
             }
         }
 
-        private async Task<ProcessamentoComando> AtualizarProcessamentoComando(Comando comando)
+        private async Task AtualizarProcessamentoComando(Comando comando)
         {
             var ultimoProcessamento = comando.ProcessamentosComandos.LastOrDefault();
 
@@ -115,27 +119,13 @@ namespace AudioGeraImagemWorker.Domain.Services
                     break;
             }
 
-            var novoProcessamentoComando = CriarNovoProcessamento(comando, novoEstadoComando);
-
-            await _comandoRepository.Atualizar(comando);
-
-            return novoProcessamentoComando;
-        }
-
-        private ProcessamentoComando CriarNovoProcessamento(Comando comando, EstadoComando novoEstado)
-        {
             comando.InstanteAtualizacao = DateTime.Now;
 
-            var novoProcessamentoComando = new ProcessamentoComando()
-            {
-                Estado = novoEstado,
-                InstanteCriacao = DateTime.Now,
-                Tentativa = 0 //Toda vez que receber um novo comando zeramos a tentativa.
-            };
+            var novoProcessamentoComando = ProcessamentoComandoFactory.Novo(novoEstadoComando);
 
             comando.ProcessamentosComandos.Add(novoProcessamentoComando);
 
-            return novoProcessamentoComando;
+            await _comandoRepository.Atualizar(comando);
         }
 
         #region [ Tratamentos dos Estados dos Comandos ]
@@ -161,6 +151,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             catch (Exception ex)
             {
                 _logger.LogError($"[{_className}] - [SalvarAudio] => Exception.: {ex.Message}");
+                throw;
             }   
         }
 
@@ -188,6 +179,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             catch (Exception ex)
             {
                 _logger.LogError($"[{_className}] - [GerarTexto] => Exception.: {ex.Message}");
+                throw;
             }
         }
 
@@ -201,6 +193,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             catch (Exception ex)
             {
                 _logger.LogError($"[{_className}] - [SalvarTexto] => Exception.: {ex.Message}");
+                throw;
             }
         }
 
@@ -227,6 +220,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             catch (Exception ex)
             {
                 _logger.LogError($"[{_className}] - [GerarImagem] => Exception.: {ex.Message}");
+                throw;
             }
         }
 
@@ -265,6 +259,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             catch (Exception ex)
             {
                 _logger.LogError($"[{_className}] - [SalvarImagem] => Exception.: {ex.Message}");
+                throw;
             }
         }
 
@@ -278,6 +273,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             catch (Exception ex)
             {
                 _logger.LogError($"[{_className}] - [Finalizar] => Exception.: {ex.Message}");
+                throw;
             }
         }
 
