@@ -1,5 +1,8 @@
-﻿namespace AudioGeraImagemWorker.Domain.Entities
+﻿using MassTransit;
+
+namespace AudioGeraImagemWorker.Domain.Entities
 {
+    [EntityName("Comando")]
     public class Comando : EntidadeBase
     {
         public byte[] Payload { get; set; }

@@ -13,12 +13,10 @@ namespace AudioGeraImagemWorker.Application.Services
         private readonly string _className = typeof(ComandoManager).Name;
 
         public EventReceiver(IComandoManager comandoManager,
-                             ILogger<ComandoManager> logger,
-                             string className)
+                             ILogger<ComandoManager> logger)
         {
             _comandoManager = comandoManager;
             _logger = logger;
-            _className = className;
         }
 
         public async Task ReceberEvento(Comando comando)

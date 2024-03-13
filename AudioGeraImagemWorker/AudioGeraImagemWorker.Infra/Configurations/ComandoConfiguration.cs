@@ -10,11 +10,11 @@ namespace AudioGeraImagemWorker.Infra.Configurations
         {
             builder.ToTable("Comandos");
             builder.HasKey(x => x.Id);
+            builder.Ignore(x => x.Payload);
             builder.Property(x => x.InstanteCriacao)
-                .HasColumnType("DATETIME");
+                .HasColumnType("DATETIME2");
             builder.Property(x => x.InstanteAtualizacao)
-                .HasColumnType("DATETIME");
-            //Acho que é isso - Dps verificar kkk
+                .HasColumnType("DATETIME2");
             builder.Property(x => x.UrlAudio)
                 .HasColumnType("VARCHAR(MAX)");
             builder.Property(x => x.TextoProcessado)
@@ -28,7 +28,7 @@ namespace AudioGeraImagemWorker.Infra.Configurations
                 procesamentoComando.Property(x => x.Estado).HasConversion<string>()
                     .HasColumnType("VARCHAR(20)");
                 procesamentoComando.Property(x => x.InstanteCriacao)
-                    .HasColumnType("DATETIME");
+                    .HasColumnType("DATETIME2");
                 procesamentoComando.Property(x => x.MensagemErro)
                     .HasColumnType("VARCHAR(256)");
             });
