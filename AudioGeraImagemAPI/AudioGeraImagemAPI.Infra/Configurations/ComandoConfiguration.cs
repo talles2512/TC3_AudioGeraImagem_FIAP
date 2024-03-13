@@ -15,10 +15,17 @@ namespace AudioGeraImagemAPI.Infra.Configurations
         {
             builder.ToTable("Comandos");
             builder.HasKey(x => x.Id);
+            builder.Ignore(x => x.Payload);
             builder.Property(x => x.InstanteCriacao)
-                .HasColumnType("DATETIME");
+                .HasColumnType("DATETIME2");
             builder.Property(x => x.InstanteAtualizacao)
-                .HasColumnType("DATETIME");
+                .HasColumnType("DATETIME2");
+            builder.Property(x => x.UrlAudio)
+                .HasColumnType("VARCHAR(MAX)");
+            builder.Property(x => x.TextoProcessado)
+                .HasColumnType("VARCHAR(MAX)");
+            builder.Property(x => x.UrlImagem)
+                .HasColumnType("VARCHAR(MAX)");
 
             builder.OwnsMany(x => x.ProcessamentosComandos, procesamentoComando =>
             {
@@ -26,7 +33,7 @@ namespace AudioGeraImagemAPI.Infra.Configurations
                 procesamentoComando.Property(x => x.Estado).HasConversion<string>()
                     .HasColumnType("VARCHAR(20)");
                 procesamentoComando.Property(x => x.InstanteCriacao)
-                    .HasColumnType("DATETIME");
+                    .HasColumnType("DATETIME2");
                 procesamentoComando.Property(x => x.MensagemErro)
                     .HasColumnType("VARCHAR(256)");
             });

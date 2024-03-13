@@ -1,8 +1,9 @@
 ﻿using AudioGeraImagemAPI.Domain.Enums;
-using System.Text.Json.Serialization;
+using MassTransit;
 
 namespace AudioGeraImagemAPI.Domain.Entities
 {
+    [EntityName("Comando")]
     public class Comando : EntidadeBase
     {
         public byte[] Payload { get; set; }
