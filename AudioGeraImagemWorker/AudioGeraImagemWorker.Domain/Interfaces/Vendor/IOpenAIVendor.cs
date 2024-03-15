@@ -1,12 +1,9 @@
-﻿using AudioGeraImagemWorker.Domain.Entities.Request;
-using AudioGeraImagemWorker.Domain.Entities.Response;
-
-namespace AudioGeraImagemWorker.Domain.Interfaces.Vendor
+﻿namespace AudioGeraImagemWorker.Domain.Interfaces.Vendor
 {
     public interface IOpenAIVendor
     {
-        Task<Tuple<TranscricaoResponse, string>> Transcricao(TranscricaoRequest request);
+        Task<string> GerarTranscricao(byte[] bytes);
 
-        Task<Tuple<GerarImagemResponse, string>> GerarImagem(GerarImagemRequest request);
+        Task<string> GerarImagem(string prompt);
     }
 }

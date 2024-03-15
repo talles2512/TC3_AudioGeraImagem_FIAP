@@ -2,8 +2,9 @@
 using Polly;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
-namespace AudioGeraImagemWorker.Infra.Utility
+namespace AudioGeraImagemWorker.Domain.Utility
 {
     public enum VerboHttp
     {
@@ -27,30 +28,39 @@ namespace AudioGeraImagemWorker.Infra.Utility
         public string Received { get; set; }
     }
 
-    public class HttpHelp
+    public class HttpHelper
     {
-        private readonly ILogger<HttpHelp> _logger;
-        private readonly string className = typeof(HttpHelp).Name;
+        private readonly ILogger<HttpHelper> _logger;
+        private readonly string className = typeof(HttpHelper).Name;
         private readonly AsyncPolicy _resiliencePolicy;
 
-        public HttpHelp(ILogger<HttpHelp> logger,
+        public HttpHelper(ILogger<HttpHelper> logger,
                         AsyncPolicy resiliencePolicy)
         {
             _logger = logger;
             _resiliencePolicy = resiliencePolicy;
         }
 
-        public async Task<Response> Send(string url,
-                                         string jsonRequest,
+        public async Task<byte[]> GetBytes(string url)
+        {
+            using var result = await _resiliencePolicy.ExecuteAsync(async () =>
+            {
+                return await ExternalIntegration(url, VerboHttp.Get, string.Empty);
+            });
+
+            return await result.Content.ReadAsByteArrayAsync();
+        }
+
+        public async Task<Response> Send<T>(string url,
                                          VerboHttp verboHttp,
-                                         Dictionary<string, string> headers = null,
-                                         MultipartFormDataContent conteudoMultipart = null)
+                                         T body,
+                                         Dictionary<string, string> headers = null)
         {
             try
             {
                 using var result = await _resiliencePolicy.ExecuteAsync(async () =>
                 {
-                    return await ExternalIntegration(url, jsonRequest, verboHttp, headers, conteudoMultipart);
+                    return await ExternalIntegration(url, verboHttp, body, headers);
                 });
 
                 var response = await ProcessAndAnalyzeResponse(result, url);
@@ -70,12 +80,10 @@ namespace AudioGeraImagemWorker.Infra.Utility
                 return rtd;
             }
         }
-
-        private async Task<HttpResponseMessage> ExternalIntegration(string url,
-                                                                    string jsonRequest,
+        private async Task<HttpResponseMessage> ExternalIntegration<T>(string url,
                                                                     VerboHttp verboHttp,
-                                                                    Dictionary<string, string> headers = null,
-                                                                    MultipartFormDataContent conteudoMultipart = null)
+                                                                    T body,
+                                                                    Dictionary<string, string> headers = null)
         {
             using (var httpClient = new HttpClient())
             {
@@ -95,27 +103,25 @@ namespace AudioGeraImagemWorker.Infra.Utility
                         break;
 
                     case VerboHttp.Post:
-                        if (conteudoMultipart != null)
-                        {
-                            result = await httpClient.PostAsync(url, conteudoMultipart);
-                            conteudoMultipart = null;
-                            break;
-                        }
+                        if (body is MultipartContent multipartContent)
+                            result = await httpClient.PostAsync(url, multipartContent);
                         else
                         {
+                            var jsonRequest = JsonSerializer.Serialize(body);
                             StringContent contentPost = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
                             result = await httpClient.PostAsync(url, contentPost);
                             contentPost.Dispose();
-                            break;
                         }
+                        break;
 
                     case VerboHttp.Put:
-                        if (string.IsNullOrEmpty(jsonRequest))
+                        if (body is null)
                         {
                             result = await httpClient.PutAsync(url, null);
                         }
                         else
                         {
+                            var jsonRequest = JsonSerializer.Serialize(body);
                             StringContent contentPut = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
                             result = await httpClient.PutAsync(url, contentPut);
                             contentPut.Dispose();

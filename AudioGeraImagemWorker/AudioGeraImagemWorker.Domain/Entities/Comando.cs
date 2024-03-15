@@ -8,7 +8,7 @@ namespace AudioGeraImagem.Domain.Entities
     {
         public byte[] Payload { get; set; }
         public string UrlAudio { get; set; }
-        public string TextoProcessado { get; set; }
+        public string Transcricao { get; set; }
         public string UrlImagem { get; set; }
         public DateTime InstanteCriacao { get; set; }
         public DateTime InstanteAtualizacao { get; set; }

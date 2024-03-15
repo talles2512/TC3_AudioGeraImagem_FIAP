@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
-		<Nullable>enable</Nullable>
+		<Nullable>disable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>dotnet-AudioGeraImagemWorker.Worker-bb9f9b14-d429-43cf-a67c-b424951bcc3b</UserSecretsId>
 	</PropertyGroup>

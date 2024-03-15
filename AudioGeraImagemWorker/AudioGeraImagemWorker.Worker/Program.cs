@@ -18,15 +18,12 @@ var hostBuilder = Host.CreateDefaultBuilder(args)
     {
         IConfiguration configuration = hostContext.Configuration;
 
-        // Dependency Injection
+        services.AddRetryPolicy();
+        services.AddParameters(configuration);
         services.AddDepencyInjection();
-        // Serilog
         services.AddSerilogConfiguration(configuration);
-        // MassTransit
         services.AddBusConfiguration(configuration);
-        // Database Context
         services.AddDbContextConfiguration(configuration);
-
         services.AddHostedService<Worker>();
     });
 

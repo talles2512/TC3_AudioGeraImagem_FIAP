@@ -17,7 +17,7 @@ namespace AudioGeraImagemWorker.Infra.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UrlAudio = table.Column<string>(type: "VARCHAR(MAX)", nullable: true),
-                    TextoProcessado = table.Column<string>(type: "VARCHAR(MAX)", nullable: true),
+                    Transcricao = table.Column<string>(type: "VARCHAR(MAX)", nullable: true),
                     UrlImagem = table.Column<string>(type: "VARCHAR(MAX)", nullable: true),
                     InstanteCriacao = table.Column<DateTime>(type: "DATETIME2", nullable: false),
                     InstanteAtualizacao = table.Column<DateTime>(type: "DATETIME2", nullable: false)

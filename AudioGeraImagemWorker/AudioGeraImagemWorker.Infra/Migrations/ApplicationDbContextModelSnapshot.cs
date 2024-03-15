@@ -34,7 +34,7 @@ namespace AudioGeraImagemWorker.Infra.Migrations
                     b.Property<DateTime>("InstanteCriacao")
                         .HasColumnType("DATETIME2");
 
-                    b.Property<string>("TextoProcessado")
+                    b.Property<string>("Transcricao")
                         .HasColumnType("VARCHAR(MAX)");
 
                     b.Property<string>("UrlAudio")

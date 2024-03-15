@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 
-namespace AudioGeraImagemWorker.Infra.Utility.Vendor
+namespace AudioGeraImagemWorker.Infra.Vendor
 {
     public class BucketManager : IBucketManager
     {

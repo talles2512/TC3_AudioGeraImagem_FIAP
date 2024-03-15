@@ -4,9 +4,9 @@ using AudioGeraImagemWorker.Domain.Interfaces;
 using AudioGeraImagemWorker.Domain.Interfaces.Repositories;
 using AudioGeraImagemWorker.Domain.Interfaces.Vendor;
 using AudioGeraImagemWorker.Domain.Services;
+using AudioGeraImagemWorker.Domain.Utility;
 using AudioGeraImagemWorker.Infra.Repositories;
-using AudioGeraImagemWorker.Infra.Utility;
-using AudioGeraImagemWorker.Infra.Utility.Vendor;
+using AudioGeraImagemWorker.Infra.Vendor;
 using AudioGeraImagemWorker.Worker.Events;
 using Polly;
 
@@ -29,13 +29,7 @@ namespace AudioGeraImagemWorker.Worker.Configurations
             //Repository
             services.AddScoped<IComandoRepository, ComandoRepository>();
             //Utility HttpClient
-            services.AddScoped<HttpHelp>();
-            services.AddSingleton<AsyncPolicy>(
-               PollyConfiguration.CreateWaitAndRetryPolicy(new[]
-               {
-                    TimeSpan.FromSeconds(1),
-                    TimeSpan.FromSeconds(3)
-               }));
+            services.AddScoped<HttpHelper>();
         }
     }
 }

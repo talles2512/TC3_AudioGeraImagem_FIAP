@@ -20,7 +20,6 @@ namespace AudioGeraImagemWorker.Worker.Configurations
         public static void UseSerilogConfiguration(this IHostBuilder hostBuilder)
         {
             hostBuilder.UseSerilog();
-            //configureHostBuilder.UseSerilog();
         }
     }
 }

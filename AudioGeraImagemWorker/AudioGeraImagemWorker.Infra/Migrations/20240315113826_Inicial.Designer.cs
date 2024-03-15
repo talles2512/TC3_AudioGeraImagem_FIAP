@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AudioGeraImagemWorker.Infra.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240314232329_Inicial")]
+    [Migration("20240315113826_Inicial")]
     partial class Inicial
     {
         /// <inheritdoc />
@@ -37,7 +37,7 @@ namespace AudioGeraImagemWorker.Infra.Migrations
                     b.Property<DateTime>("InstanteCriacao")
                         .HasColumnType("DATETIME2");
 
-                    b.Property<string>("TextoProcessado")
+                    b.Property<string>("Transcricao")
                         .HasColumnType("VARCHAR(MAX)");
 
                     b.Property<string>("UrlAudio")

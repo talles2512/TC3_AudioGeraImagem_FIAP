@@ -23,7 +23,7 @@ namespace AudioGeraImagemAPI.Infra.Configurations
                 .HasColumnType("DATETIME2");
             builder.Property(x => x.UrlAudio)
                 .HasColumnType("VARCHAR(MAX)");
-            builder.Property(x => x.TextoProcessado)
+            builder.Property(x => x.Transcricao)
                 .HasColumnType("VARCHAR(MAX)");
             builder.Property(x => x.UrlImagem)
                 .HasColumnType("VARCHAR(MAX)");

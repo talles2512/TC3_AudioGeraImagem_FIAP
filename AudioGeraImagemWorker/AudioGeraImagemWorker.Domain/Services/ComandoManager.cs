@@ -1,39 +1,37 @@
 ﻿using AudioGeraImagem.Domain.Entities;
-using AudioGeraImagemWorker.Domain.Entities;
-using AudioGeraImagemWorker.Domain.Entities.Request;
 using AudioGeraImagemWorker.Domain.Enums;
 using AudioGeraImagemWorker.Domain.Factories;
 using AudioGeraImagemWorker.Domain.Interfaces;
 using AudioGeraImagemWorker.Domain.Interfaces.Repositories;
 using AudioGeraImagemWorker.Domain.Interfaces.Vendor;
-using Microsoft.Extensions.Configuration;
+using AudioGeraImagemWorker.Domain.Utility;
 using Microsoft.Extensions.Logging;
 
 namespace AudioGeraImagemWorker.Domain.Services
 {
     public class ComandoManager : IComandoManager
     {
+        private readonly HttpHelper _httpHelper;
         private readonly IComandoRepository _comandoRepository;
         private readonly IErroManager _erroManager;
         private readonly IBucketManager _bucketManager;
         private readonly IOpenAIVendor _openAIVendor;
-
-        private readonly IConfiguration _configuration;
         private readonly ILogger<ComandoManager> _logger;
         private readonly string _className = typeof(ComandoManager).Name;
 
-        public ComandoManager(IComandoRepository comandoRepository,
-                              IErroManager erroManager,
-                              IBucketManager bucketManager,
-                              IOpenAIVendor openAIVendor,
-                              IConfiguration configuration,
-                              ILogger<ComandoManager> logger)
+        public ComandoManager(
+            HttpHelper httpHelper,
+            IComandoRepository comandoRepository,
+            IErroManager erroManager,
+            IBucketManager bucketManager,
+            IOpenAIVendor openAIVendor,
+            ILogger<ComandoManager> logger)
         {
+            _httpHelper = httpHelper;
             _comandoRepository = comandoRepository;
             _erroManager = erroManager;
             _bucketManager = bucketManager;
             _openAIVendor = openAIVendor;
-            _configuration = configuration;
             _logger = logger;
         }
 
@@ -127,9 +125,8 @@ namespace AudioGeraImagemWorker.Domain.Services
         {
             try
             {
-                var bytes = comando.Payload;
-                var urlAudio = await _bucketManager.ArmazenarObjeto(bytes, string.Concat(comando.Id.ToString(), ".mp3"));
-                comando.UrlAudio = urlAudio;
+                var fileName = string.Concat(comando.Id.ToString(), ".mp3");
+                comando.UrlAudio = await _bucketManager.ArmazenarObjeto(comando.Payload, fileName);
             }
             catch (Exception ex)
             {
@@ -143,21 +140,7 @@ namespace AudioGeraImagemWorker.Domain.Services
         {
             try
             {
-                TranscricaoRequest request = new TranscricaoRequest();
-                request.model = _configuration.GetSection("OpenAI:TranscriptionConfiguration")["model"] ?? string.Empty;
-                request.bytes = comando.Payload;
-                request.filename = "audio.mp3";
-
-                var result = await _openAIVendor.Transcricao(request);
-
-                if (result.Item1 != null && string.IsNullOrEmpty(result.Item2))
-                {
-                    comando.TextoProcessado = result.Item1.text;
-                }
-                else
-                {
-                    _logger.LogError($"[{_className}] - [GerarTexto] => Exception.: {result.Item2}");
-                }
+                comando.Transcricao = await _openAIVendor.GerarTranscricao(comando.Payload);
             }
             catch (Exception ex)
             {
@@ -171,20 +154,7 @@ namespace AudioGeraImagemWorker.Domain.Services
         {
             try
             {
-                GerarImagemRequest request = new GerarImagemRequest();
-                request.model = _configuration.GetSection("OpenAI:GenerateImageConfiguration")["model"] ?? string.Empty;
-                request.n = int.Parse(_configuration.GetSection("OpenAI:GenerateImageConfiguration")["n"]);
-                request.size = _configuration.GetSection("OpenAI:GenerateImageConfiguration")["size"] ?? string.Empty;
-                request.prompt = comando.TextoProcessado;
-                var result = await _openAIVendor.GerarImagem(request);
-                if (result.Item1 != null && string.IsNullOrEmpty(result.Item2))
-                {
-                    comando.UrlImagem = result.Item1.data[0].url;
-                }
-                else
-                {
-                    _logger.LogError($"[{_className}] - [GerarImagem] => Exception.: {result.Item2}");
-                }
+                comando.UrlImagem = await _openAIVendor.GerarImagem(comando.Transcricao);
             }
             catch (Exception ex)
             {
@@ -198,10 +168,9 @@ namespace AudioGeraImagemWorker.Domain.Services
         {
             try
             {
-                using HttpClient httpClient = new HttpClient();
-                var bytes = await httpClient.GetByteArrayAsync(comando.UrlImagem);
-
-                var urlImagem = await _bucketManager.ArmazenarObjeto(bytes, string.Concat(comando.Id.ToString(), ".jpeg"));
+                var bytes = await _httpHelper.GetBytes(comando.UrlImagem);
+                var fileName = string.Concat(comando.Id.ToString(), ".jpeg");
+                var urlImagem = await _bucketManager.ArmazenarObjeto(bytes, fileName);
                 comando.UrlImagem = urlImagem;
             }
             catch (Exception ex)
