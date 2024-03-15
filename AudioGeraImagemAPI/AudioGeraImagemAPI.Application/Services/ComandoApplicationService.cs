@@ -1,8 +1,9 @@
-﻿using AudioGeraImagem.Domain.Entities;
-using AudioGeraImagemAPI.Application.Intefaces;
+﻿using AudioGeraImagemAPI.Application.Intefaces;
+using AudioGeraImagemAPI.Application.ViewModels;
 using AudioGeraImagemAPI.Domain.Entities;
 using AudioGeraImagemAPI.Domain.Enums;
 using AudioGeraImagemAPI.Domain.Interfaces;
+using System.Net.Mime;
 
 namespace AudioGeraImagemAPI.Application.Services
 {
@@ -15,14 +16,6 @@ namespace AudioGeraImagemAPI.Application.Services
             _service = service;
         }
 
-        public async Task<string> CriarImagem(Stream stream)
-        {
-            var bytes = ObterBytes(stream);
-            var comando = CriarComando(bytes);
-
-            return await _service.CriarImagem(comando);
-        }
-
         public async Task<ICollection<Comando>> ListarCriacoes(string busca)
         {
             return await _service.ListarCriacoes(busca);
@@ -33,21 +26,35 @@ namespace AudioGeraImagemAPI.Application.Services
             throw new NotImplementedException();
         }
 
-        private byte[] ObterBytes(Stream stream)
+        public async Task<Tuple<bool, string>> GerarImagem(GerarImagemViewModel gerarImagem)
         {
-            using var memoryStream = new MemoryStream();
-            stream.CopyTo(memoryStream);
-            var bytes = memoryStream.ToArray();
+            if (!RequisicaoValida(gerarImagem))
+                return Tuple.Create(false, "Escreva uma descrição com até 256 caracteres e o arquivo deve ser .mp3");
 
-            return bytes;
+            var comando = CriarComando(gerarImagem);
+
+            await _service.GerarImagem(comando, gerarImagem.Arquivo);
+
+            return Tuple.Create(true, comando.Id.ToString());
         }
 
-        private Comando CriarComando(byte[] bytes)
+        private bool RequisicaoValida(GerarImagemViewModel gerarImagem)
+        {
+            if (gerarImagem.Descricao.Length > 256)
+                return false;
+
+            if (!gerarImagem.Arquivo.ContentType.Contains("audio/mpeg"))
+                return false;
+
+            return true;
+        }
+
+        private Comando CriarComando(GerarImagemViewModel gerarImagem)
         {
             var comando = new Comando()
             {
                 Id = Guid.NewGuid(),
-                Payload = bytes,
+                Descricao = gerarImagem.Descricao,
                 InstanteCriacao = DateTime.Now,
                 ProcessamentosComandos = new()
             };

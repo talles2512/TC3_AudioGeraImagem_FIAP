@@ -1,4 +1,4 @@
-﻿using AudioGeraImagem.Domain.Entities;
+﻿using AudioGeraImagemAPI.Application.ViewModels;
 using AudioGeraImagemAPI.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ namespace AudioGeraImagemAPI.Application.Intefaces
 {
     public interface IComandoApplicationService
     {
-        Task<string> CriarImagem(Stream stream);
+        Task<Tuple<bool, string>> GerarImagem(GerarImagemViewModel gerarImagem);
         Task<ICollection<Comando>> ListarCriacoes(string busca);
         Task ObterImagem(string id);
     }

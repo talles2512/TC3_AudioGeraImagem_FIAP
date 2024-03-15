@@ -1,5 +1,5 @@
 ﻿using AudioGeraImagemAPI.Application.Intefaces;
-using Microsoft.AspNetCore.Http;
+using AudioGeraImagemAPI.Application.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AudioGeraImagemAPI.API.Controllers
@@ -15,16 +15,17 @@ namespace AudioGeraImagemAPI.API.Controllers
             _applicationService = applicationService;
         }
 
-        [HttpPost("cria-imagem")]
-        public async Task<IActionResult> CriaImagem(IFormFile formFile)
+        [HttpPost("gerar-imagem")]
+        public async Task<IActionResult> GerarImagem([FromForm] GerarImagemViewModel gerarImagem)
         {
             try
             {
-                using var stream = formFile.OpenReadStream();
+                var (sucesso, resultado) = await _applicationService.GerarImagem(gerarImagem);
 
-                var id = await _applicationService.CriarImagem(stream);
-
-                return Accepted(id);
+                if(sucesso)
+                    return Accepted(string.Empty, resultado);
+                else
+                    return BadRequest(resultado);
             }
             catch (Exception ex)
             {

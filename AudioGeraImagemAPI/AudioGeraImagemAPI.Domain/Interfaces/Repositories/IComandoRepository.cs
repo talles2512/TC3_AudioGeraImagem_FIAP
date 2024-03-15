@@ -1,5 +1,4 @@
-﻿using AudioGeraImagem.Domain.Entities;
-using AudioGeraImagemAPI.Domain.Entities;
+﻿using AudioGeraImagemAPI.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

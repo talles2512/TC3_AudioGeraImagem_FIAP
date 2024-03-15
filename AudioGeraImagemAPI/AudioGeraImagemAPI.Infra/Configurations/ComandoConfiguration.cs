@@ -1,5 +1,4 @@
-﻿using AudioGeraImagem.Domain.Entities;
-using AudioGeraImagemAPI.Domain.Entities;
+﻿using AudioGeraImagemAPI.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -16,6 +15,8 @@ namespace AudioGeraImagemAPI.Infra.Configurations
         {
             builder.ToTable("Comandos");
             builder.HasKey(x => x.Id);
+            builder.Property(x => x.Descricao)
+                .HasColumnType("VARCHAR(256)");
             builder.Ignore(x => x.Payload);
             builder.Property(x => x.InstanteCriacao)
                 .HasColumnType("DATETIME2");
