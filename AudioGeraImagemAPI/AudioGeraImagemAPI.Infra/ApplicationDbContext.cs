@@ -1,4 +1,5 @@
-﻿using AudioGeraImagemAPI.Domain.Entities;
+﻿using AudioGeraImagem.Domain.Entities;
+using AudioGeraImagemAPI.Domain.Entities;
 using AudioGeraImagemAPI.Infra.Configurations;
 using Microsoft.EntityFrameworkCore;
 using System;

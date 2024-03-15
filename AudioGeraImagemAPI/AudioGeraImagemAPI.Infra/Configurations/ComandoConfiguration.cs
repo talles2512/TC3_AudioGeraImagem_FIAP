@@ -1,4 +1,5 @@
-﻿using AudioGeraImagemAPI.Domain.Entities;
+﻿using AudioGeraImagem.Domain.Entities;
+using AudioGeraImagemAPI.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -30,6 +31,7 @@ namespace AudioGeraImagemAPI.Infra.Configurations
             builder.OwnsMany(x => x.ProcessamentosComandos, procesamentoComando =>
             {
                 procesamentoComando.ToTable("ProcessamentoComandos");
+                procesamentoComando.HasKey(x => x.Id);
                 procesamentoComando.Property(x => x.Estado).HasConversion<string>()
                     .HasColumnType("VARCHAR(20)");
                 procesamentoComando.Property(x => x.InstanteCriacao)

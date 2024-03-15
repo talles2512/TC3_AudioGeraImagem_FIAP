@@ -31,16 +31,15 @@ namespace AudioGeraImagemWorker.Infra.Migrations
                 name: "ProcessamentoComandos",
                 columns: table => new
                 {
-                    ComandoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Estado = table.Column<string>(type: "VARCHAR(20)", nullable: false),
                     InstanteCriacao = table.Column<DateTime>(type: "DATETIME2", nullable: false),
-                    MensagemErro = table.Column<string>(type: "VARCHAR(256)", nullable: true)
+                    MensagemErro = table.Column<string>(type: "VARCHAR(256)", nullable: true),
+                    ComandoId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProcessamentoComandos", x => new { x.ComandoId, x.Id });
+                    table.PrimaryKey("PK_ProcessamentoComandos", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ProcessamentoComandos_Comandos_ComandoId",
                         column: x => x.ComandoId,
@@ -48,6 +47,11 @@ namespace AudioGeraImagemWorker.Infra.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProcessamentoComandos_ComandoId",
+                table: "ProcessamentoComandos",
+                column: "ComandoId");
         }
 
         /// <inheritdoc />

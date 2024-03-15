@@ -5,7 +5,6 @@
         Recebido,
         SalvandoAudio,
         GerandoTexto,
-        SalvandoTexto,
         GerandoImagem,
         SalvadoImagem,
         Finalizado,

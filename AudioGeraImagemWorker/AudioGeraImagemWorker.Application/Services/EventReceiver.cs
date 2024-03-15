@@ -1,4 +1,5 @@
-﻿using AudioGeraImagemWorker.Application.Interfaces;
+﻿using AudioGeraImagem.Domain.Entities;
+using AudioGeraImagemWorker.Application.Interfaces;
 using AudioGeraImagemWorker.Domain.Entities;
 using AudioGeraImagemWorker.Domain.Interfaces;
 using AudioGeraImagemWorker.Domain.Services;

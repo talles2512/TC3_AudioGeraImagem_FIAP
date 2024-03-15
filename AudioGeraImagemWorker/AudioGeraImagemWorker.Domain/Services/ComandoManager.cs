@@ -1,4 +1,5 @@
-﻿using AudioGeraImagemWorker.Domain.Entities;
+﻿using AudioGeraImagem.Domain.Entities;
+using AudioGeraImagemWorker.Domain.Entities;
 using AudioGeraImagemWorker.Domain.Entities.Request;
 using AudioGeraImagemWorker.Domain.Enums;
 using AudioGeraImagemWorker.Domain.Factories;
@@ -58,10 +59,6 @@ namespace AudioGeraImagemWorker.Domain.Services
                         await GerarTexto(comando);
                         break;
 
-                    case EstadoComando.SalvandoTexto:
-                        await SalvarTexto(comando);
-                        break;
-
                     case EstadoComando.GerandoImagem:
                         await GerarImagem(comando);
                         break;
@@ -102,10 +99,6 @@ namespace AudioGeraImagemWorker.Domain.Services
                     break;
 
                 case EstadoComando.GerandoTexto:
-                    novoEstadoComando = EstadoComando.SalvandoTexto;
-                    break;
-
-                case EstadoComando.SalvandoTexto:
                     novoEstadoComando = EstadoComando.GerandoImagem;
                     break;
 
@@ -136,16 +129,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             {
                 var bytes = comando.Payload;
                 var urlAudio = await _bucketManager.ArmazenarObjeto(bytes, string.Concat(comando.Id.ToString(), ".mp3"));
-                if (string.IsNullOrEmpty(urlAudio))
-                {
-                    _logger.LogError($"[{_className}] - [SalvarAudio] => Exception.: Falha no armazenamento do audio no Azure Blob Storage");
-                }
-                else
-                {
-                    comando.UrlAudio = urlAudio;
-                    //Salvando URL do Blob do Audio
-                    await _comandoRepository.Atualizar(comando);
-                }   
+                comando.UrlAudio = urlAudio;
             }
             catch (Exception ex)
             {
@@ -182,21 +166,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             }
         }
 
-        // 3. Gerando Texto >> Salvando Texto
-        private async Task SalvarTexto(Comando comando)
-        {
-            try
-            {
-                await _comandoRepository.Atualizar(comando);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"[{_className}] - [SalvarTexto] => Exception.: {ex.Message}");
-                throw;
-            }
-        }
-
-        // 4. Salvando Texto >> Gerando Imagem
+        // 3. Salvando Texto >> Gerando Imagem
         private async Task GerarImagem(Comando comando)
         {
             try
@@ -205,7 +175,7 @@ namespace AudioGeraImagemWorker.Domain.Services
                 request.model = _configuration.GetSection("OpenAI:GenerateImageConfiguration")["model"] ?? string.Empty;
                 request.n = int.Parse(_configuration.GetSection("OpenAI:GenerateImageConfiguration")["n"]);
                 request.size = _configuration.GetSection("OpenAI:GenerateImageConfiguration")["size"] ?? string.Empty;
-
+                request.prompt = comando.TextoProcessado;
                 var result = await _openAIVendor.GerarImagem(request);
                 if (result.Item1 != null && string.IsNullOrEmpty(result.Item2))
                 {
@@ -223,18 +193,16 @@ namespace AudioGeraImagemWorker.Domain.Services
             }
         }
 
-        // 5. Gerando Imagem >> Salvado Imagem
+        // 4. Gerando Imagem >> Salvado Imagem
         private async Task SalvarImagem(Comando comando)
         {
             try
             {
                 using HttpClient httpClient = new HttpClient();
-                var bytes = await httpClient.GetByteArrayAsync(comando.UrlAudio);
+                var bytes = await httpClient.GetByteArrayAsync(comando.UrlImagem);
 
                 var urlImagem = await _bucketManager.ArmazenarObjeto(bytes, string.Concat(comando.Id.ToString(), ".jpeg"));
                 comando.UrlImagem = urlImagem;
-
-                await _comandoRepository.Atualizar(comando);
             }
             catch (Exception ex)
             {
@@ -243,7 +211,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             }
         }
 
-        // 6. Salvando Imagem >> Finalizado
+        // 5. Salvando Imagem >> Finalizado
         private async Task Finalizar(Comando comando)
         {
             try

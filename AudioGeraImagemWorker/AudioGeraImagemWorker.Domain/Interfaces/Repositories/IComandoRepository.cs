@@ -1,4 +1,5 @@
-﻿using AudioGeraImagemWorker.Domain.Entities;
+﻿using AudioGeraImagem.Domain.Entities;
+using AudioGeraImagemWorker.Domain.Entities;
 
 namespace AudioGeraImagemWorker.Domain.Interfaces.Repositories
 {

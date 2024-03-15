@@ -1,7 +1,8 @@
-﻿using AudioGeraImagemAPI.Domain.Enums;
+﻿using AudioGeraImagemAPI.Domain.Entities;
+using AudioGeraImagemAPI.Domain.Enums;
 using MassTransit;
 
-namespace AudioGeraImagemAPI.Domain.Entities
+namespace AudioGeraImagem.Domain.Entities
 {
     [EntityName("Comando")]
     public class Comando : EntidadeBase

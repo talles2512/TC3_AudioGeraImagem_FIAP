@@ -22,7 +22,7 @@ namespace AudioGeraImagemWorker.Infra.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("AudioGeraImagemWorker.Domain.Entities.Comando", b =>
+            modelBuilder.Entity("AudioGeraImagem.Domain.Entities.Comando", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -48,18 +48,16 @@ namespace AudioGeraImagemWorker.Infra.Migrations
                     b.ToTable("Comandos", (string)null);
                 });
 
-            modelBuilder.Entity("AudioGeraImagemWorker.Domain.Entities.Comando", b =>
+            modelBuilder.Entity("AudioGeraImagem.Domain.Entities.Comando", b =>
                 {
                     b.OwnsMany("AudioGeraImagemWorker.Domain.Entities.ProcessamentoComando", "ProcessamentosComandos", b1 =>
                         {
-                            b1.Property<Guid>("ComandoId")
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uniqueidentifier");
 
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+                            b1.Property<Guid>("ComandoId")
+                                .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Estado")
                                 .IsRequired()
@@ -71,7 +69,9 @@ namespace AudioGeraImagemWorker.Infra.Migrations
                             b1.Property<string>("MensagemErro")
                                 .HasColumnType("VARCHAR(256)");
 
-                            b1.HasKey("ComandoId", "Id");
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("ComandoId");
 
                             b1.ToTable("ProcessamentoComandos", (string)null);
 

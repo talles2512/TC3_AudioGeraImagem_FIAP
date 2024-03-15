@@ -1,4 +1,5 @@
-﻿using AudioGeraImagemAPI.Application.Intefaces;
+﻿using AudioGeraImagem.Domain.Entities;
+using AudioGeraImagemAPI.Application.Intefaces;
 using AudioGeraImagemAPI.Domain.Entities;
 using AudioGeraImagemAPI.Domain.Enums;
 using AudioGeraImagemAPI.Domain.Interfaces;
