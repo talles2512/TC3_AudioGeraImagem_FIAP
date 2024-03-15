@@ -1,4 +1,5 @@
 ﻿using AudioGeraImagem.Domain.Entities;
+using AudioGeraImagem.Domain.Messages;
 using AudioGeraImagemWorker.Domain.Enums;
 using AudioGeraImagemWorker.Domain.Factories;
 using AudioGeraImagemWorker.Domain.Interfaces;
@@ -35,13 +36,34 @@ namespace AudioGeraImagemWorker.Domain.Services
             _logger = logger;
         }
 
-        public async Task ProcessarComando(Comando comando)
+        public async Task ProcessarComando(ComandoMessage mensagem)
         {
-            await AtualizarProcessamentoComando(comando);
-            await ExecutarComando(comando);
+            var comando = await _comandoRepository.Obter(mensagem.ComandoId);
+
+            if(comando is null)
+            {
+                _logger.LogWarning($"[{_className}] - [ProcessarComando] => Mensagem descartada, pois o comando de id '{mensagem.ComandoId}' não existe.");
+            }
+            else
+            {
+                await AtualizarProcessamentoComando(comando);
+                await ExecutarComando(comando, mensagem.Payload);
+            }
         }
 
-        public async Task ExecutarComando(Comando comando)
+        public async Task ReprocessarComando(ComandoMessage mensagem)
+        {
+            var comando = await _comandoRepository.Obter(mensagem.ComandoId);
+
+            if (comando is null)
+            {
+                _logger.LogWarning($"[{_className}] - [ReprocessarComando] => Mensagem descartada, pois o comando de id '{mensagem.ComandoId}' não existe.");
+            }
+
+            await ExecutarComando(comando, mensagem.Payload);
+        }
+
+        public async Task ExecutarComando(Comando comando, byte[] payload = null)
         {
             var ultimoProcessamento = comando.ProcessamentosComandos.LastOrDefault();
 
@@ -50,7 +72,7 @@ namespace AudioGeraImagemWorker.Domain.Services
                 switch (ultimoProcessamento.Estado)
                 {
                     case EstadoComando.SalvandoAudio:
-                        await SalvarAudio(comando);
+                        await SalvarAudio(comando, payload);
                         break;
 
                     case EstadoComando.GerandoTexto:
@@ -71,12 +93,12 @@ namespace AudioGeraImagemWorker.Domain.Services
                 }
 
                 await AtualizarProcessamentoComando(comando);
-                await ExecutarComando(comando);
+                await ExecutarComando(comando, payload);
             }
             catch (Exception ex)
             {
                 ultimoProcessamento.MensagemErro = ex.Message;
-                await _erroManager.TratarErro(comando, ultimoProcessamento.Estado);
+                await _erroManager.TratarErro(comando, ultimoProcessamento.Estado, payload);
             }
         }
 
@@ -121,12 +143,12 @@ namespace AudioGeraImagemWorker.Domain.Services
         #region [ Tratamentos dos Estados dos Comandos ]
 
         // 1. Estado Recebido >> Salvando Audio
-        private async Task SalvarAudio(Comando comando)
+        private async Task SalvarAudio(Comando comando, byte[] payload = null)
         {
             try
             {
-                var fileName = string.Concat(comando.Id.ToString(), ".mp3");
-                comando.UrlAudio = await _bucketManager.ArmazenarObjeto(comando.Payload, fileName);
+                var fileName = string.Concat("audios/", comando.Id.ToString(), ".mp3");
+                comando.UrlAudio = await _bucketManager.ArmazenarObjeto(payload, fileName);
             }
             catch (Exception ex)
             {
@@ -140,7 +162,8 @@ namespace AudioGeraImagemWorker.Domain.Services
         {
             try
             {
-                comando.Transcricao = await _openAIVendor.GerarTranscricao(comando.Payload);
+                var bytes = await _httpHelper.GetBytes(comando.UrlAudio);
+                comando.Transcricao = await _openAIVendor.GerarTranscricao(bytes);
             }
             catch (Exception ex)
             {
@@ -169,7 +192,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             try
             {
                 var bytes = await _httpHelper.GetBytes(comando.UrlImagem);
-                var fileName = string.Concat(comando.Id.ToString(), ".jpeg");
+                var fileName = string.Concat("imagens/", comando.Id.ToString(), ".jpeg");
                 var urlImagem = await _bucketManager.ArmazenarObjeto(bytes, fileName);
                 comando.UrlImagem = urlImagem;
             }

@@ -1,10 +1,12 @@
 ﻿using AudioGeraImagem.Domain.Entities;
+using AudioGeraImagem.Domain.Messages;
 using AudioGeraImagemWorker.Domain.Entities;
 using AudioGeraImagemWorker.Domain.Enums;
 using AudioGeraImagemWorker.Domain.Factories;
 using AudioGeraImagemWorker.Domain.Interfaces;
 using AudioGeraImagemWorker.Domain.Interfaces.Repositories;
 using MassTransit;
+using MassTransit.Scheduling;
 
 namespace AudioGeraImagemWorker.Domain.Services
 {
@@ -13,13 +15,15 @@ namespace AudioGeraImagemWorker.Domain.Services
         private readonly IComandoRepository _comandoRepository;
         private readonly IBus _bus;
 
-        public ErroManager(IComandoRepository comandoRepository, IBus bus)
+        public ErroManager(
+            IComandoRepository comandoRepository,
+            IBus bus)
         {
             _comandoRepository = comandoRepository;
             _bus = bus;
         }
 
-        public async Task TratarErro(Comando comando, EstadoComando ultimoEstado)
+        public async Task TratarErro(Comando comando, EstadoComando ultimoEstado, byte[] payload)
         {
             comando.InstanteAtualizacao = DateTime.Now;
 
@@ -35,10 +39,25 @@ namespace AudioGeraImagemWorker.Domain.Services
             comando.ProcessamentosComandos.Add(novoProcessamentoComando);
             await _comandoRepository.Atualizar(comando);
 
-            // Envia para uma fila de reprocessamento caso não tenha estourado o limite de falhas
             if (novoProcessamentoComando.Estado != EstadoComando.Falha)
-                await _bus.Send(comando);
+            {
+                var mensagem = CriarMensagem(comando, payload);
+                await PublicarMensagem(mensagem);
+            }
+        }
 
+        private ComandoMessage CriarMensagem(Comando comando, byte[] payload)
+        {
+            return new()
+            {
+                ComandoId = comando.Id,
+                Payload = payload
+            };
+        }
+        private async Task PublicarMensagem(ComandoMessage mensagem)
+        {
+            var messageScheduler = _bus.CreateMessageScheduler(new Uri("queue:retentativa"));
+            await messageScheduler.SchedulePublish(DateTime.UtcNow.AddSeconds(30), mensagem);
         }
     }
 }

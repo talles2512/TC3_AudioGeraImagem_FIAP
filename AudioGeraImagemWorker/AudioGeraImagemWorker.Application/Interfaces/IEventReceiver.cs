@@ -1,10 +1,10 @@
-﻿using AudioGeraImagem.Domain.Entities;
-using AudioGeraImagemWorker.Domain.Entities;
+﻿using AudioGeraImagem.Domain.Messages;
 
 namespace AudioGeraImagemWorker.Application.Interfaces
 {
     public interface IEventReceiver
     {
-        Task ReceberEvento(Comando comando);
+        Task ReceberMensagem(ComandoMessage mensagem);
+        Task ReceberRetentativa(ComandoMessage mensagem);
     }
 }

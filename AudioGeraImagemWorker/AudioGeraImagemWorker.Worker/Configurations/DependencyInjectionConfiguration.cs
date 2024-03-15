@@ -17,7 +17,7 @@ namespace AudioGeraImagemWorker.Worker.Configurations
         public static void AddDepencyInjection(this IServiceCollection services)
         {
             // Worker
-            services.AddScoped<ComandoConsumer>();
+            services.AddScoped<NovoComandoConsumer>();
             // Application
             services.AddScoped<IEventReceiver, EventReceiver>();
             // Domain

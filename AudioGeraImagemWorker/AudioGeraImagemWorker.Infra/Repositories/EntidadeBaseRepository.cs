@@ -33,7 +33,7 @@ namespace AudioGeraImagemWorker.Infra.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<TEntidade> Obter(string id)
+        public async Task<TEntidade> Obter(Guid id)
         {
             return await _dbSet.FindAsync(id);
         }

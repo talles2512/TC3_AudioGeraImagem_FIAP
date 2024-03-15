@@ -6,6 +6,7 @@ namespace AudioGeraImagem.Domain.Entities
     [EntityName("Comando")]
     public class Comando : EntidadeBase
     {
+        public string Descricao { get; set; }
         public byte[] Payload { get; set; }
         public string UrlAudio { get; set; }
         public string Transcricao { get; set; }

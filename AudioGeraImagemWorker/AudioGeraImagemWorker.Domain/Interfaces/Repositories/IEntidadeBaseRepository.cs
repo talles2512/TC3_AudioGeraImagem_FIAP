@@ -6,7 +6,7 @@ namespace AudioGeraImagemWorker.Domain.Interfaces.Repositories
     {
         Task Inserir(TEntidade entidade);
 
-        Task<TEntidade> Obter(string id);
+        Task<TEntidade> Obter(Guid id);
 
         Task<ICollection<TEntidade>> ObterTodos();
 

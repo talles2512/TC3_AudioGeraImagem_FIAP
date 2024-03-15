@@ -1,10 +1,10 @@
-﻿using AudioGeraImagem.Domain.Entities;
-using AudioGeraImagemWorker.Domain.Entities;
+﻿using AudioGeraImagem.Domain.Messages;
 
 namespace AudioGeraImagemWorker.Domain.Interfaces
 {
     public interface IComandoManager
     {
-        Task ProcessarComando(Comando comando);
+        Task ProcessarComando(ComandoMessage mensagem);
+        Task ReprocessarComando(ComandoMessage mensagem);
     }
 }

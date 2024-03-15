@@ -1,8 +1,7 @@
 ﻿using AudioGeraImagemWorker.Domain.Interfaces.Vendor;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using System.ComponentModel;
 
 namespace AudioGeraImagemWorker.Infra.Vendor
 {
@@ -21,8 +20,7 @@ namespace AudioGeraImagemWorker.Infra.Vendor
         {
             BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
-            await containerClient.CreateIfNotExistsAsync();
-
+            await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
             return containerClient.GetBlobClient(blobName);
         }
 

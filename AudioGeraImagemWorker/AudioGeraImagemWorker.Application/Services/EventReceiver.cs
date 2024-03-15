@@ -1,6 +1,5 @@
-﻿using AudioGeraImagem.Domain.Entities;
+﻿using AudioGeraImagem.Domain.Messages;
 using AudioGeraImagemWorker.Application.Interfaces;
-using AudioGeraImagemWorker.Domain.Entities;
 using AudioGeraImagemWorker.Domain.Interfaces;
 using AudioGeraImagemWorker.Domain.Services;
 using Microsoft.Extensions.Logging;
@@ -20,15 +19,27 @@ namespace AudioGeraImagemWorker.Application.Services
             _logger = logger;
         }
 
-        public async Task ReceberEvento(Comando comando)
+        public async Task ReceberMensagem(ComandoMessage mensagem)
         {
             try
             {
-                await _comandoManager.ProcessarComando(comando);
+                await _comandoManager.ProcessarComando(mensagem);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"[{_className}] - [ReceberEvento] => Exception.: {ex.Message}");
+                _logger.LogError($"[{_className}] - [ReceberMensagem] => Exception.: {ex.Message}");
+            }
+        }
+
+        public async Task ReceberRetentativa(ComandoMessage mensagem)
+        {
+            try
+            {
+                await _comandoManager.ReprocessarComando(mensagem);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[{_className}] - [ReceberRetentativa] => Exception.: {ex.Message}");
             }
         }
     }
