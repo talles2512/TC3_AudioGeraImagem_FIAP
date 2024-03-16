@@ -6,21 +6,20 @@ using AudioGeraImagemWorker.Domain.Factories;
 using AudioGeraImagemWorker.Domain.Interfaces;
 using AudioGeraImagemWorker.Domain.Interfaces.Repositories;
 using MassTransit;
-using MassTransit.Scheduling;
 
 namespace AudioGeraImagemWorker.Domain.Services
 {
     public class ErroManager : IErroManager
     {
         private readonly IComandoRepository _comandoRepository;
-        private readonly IBus _bus;
+        private readonly IMessageScheduler _messageScheduler;
 
         public ErroManager(
             IComandoRepository comandoRepository,
-            IBus bus)
+            IMessageScheduler messageScheduler)
         {
             _comandoRepository = comandoRepository;
-            _bus = bus;
+            _messageScheduler = messageScheduler;
         }
 
         public async Task TratarErro(Comando comando, EstadoComando ultimoEstado, byte[] payload)
@@ -46,7 +45,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             }
         }
 
-        private ComandoMessage CriarMensagem(Comando comando, byte[] payload)
+        private RetentativaComandoMessage CriarMensagem(Comando comando, byte[] payload)
         {
             return new()
             {
@@ -54,10 +53,9 @@ namespace AudioGeraImagemWorker.Domain.Services
                 Payload = payload
             };
         }
-        private async Task PublicarMensagem(ComandoMessage mensagem)
+        private async Task PublicarMensagem(RetentativaComandoMessage mensagem)
         {
-            var messageScheduler = _bus.CreateMessageScheduler(new Uri("queue:retentativa"));
-            await messageScheduler.SchedulePublish(DateTime.UtcNow.AddSeconds(30), mensagem);
+            await _messageScheduler.SchedulePublish(DateTime.UtcNow + TimeSpan.FromSeconds(20), mensagem);
         }
     }
 }

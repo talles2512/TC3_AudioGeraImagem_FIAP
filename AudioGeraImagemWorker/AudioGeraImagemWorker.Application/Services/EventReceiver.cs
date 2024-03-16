@@ -31,7 +31,7 @@ namespace AudioGeraImagemWorker.Application.Services
             }
         }
 
-        public async Task ReceberRetentativa(ComandoMessage mensagem)
+        public async Task ReceberRetentativa(RetentativaComandoMessage mensagem)
         {
             try
             {

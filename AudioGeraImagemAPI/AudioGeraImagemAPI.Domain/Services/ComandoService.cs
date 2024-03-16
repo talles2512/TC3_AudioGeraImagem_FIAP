@@ -28,9 +28,10 @@ namespace AudioGeraImagemAPI.Domain.Services
 
             var payload = ObterPayload(stream);
             var mensagem = CriarMensagem(comando, payload);
-            await PublicarMensagem(mensagem);
 
             await _repository.Inserir(comando);
+
+            await PublicarMensagem(mensagem);
         }
 
         private byte[] ObterPayload(Stream stream)

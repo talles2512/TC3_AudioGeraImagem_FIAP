@@ -14,21 +14,10 @@ namespace AudioGeraImagemWorker.Worker.Configurations
             var usuario = configuration.GetSection("MassTransit")["Usuario"] ?? string.Empty;
             var senha = configuration.GetSection("MassTransit")["Senha"] ?? string.Empty;
 
-            //services.AddQuartz(q =>
-            //{
-            //    q.UseMicrosoftDependencyInjectionJobFactory();
-
-            //    q.UseDefaultThreadPool(tp =>
-            //    {
-            //        tp.MaxConcurrency = 10;
-            //    });
-
-            //    q.UseTimeZoneConverter();
-
-            //});
-
             services.AddMassTransit(x =>
             {
+                x.AddDelayedMessageScheduler();
+
                 x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(servidor, "/", h =>
@@ -36,6 +25,8 @@ namespace AudioGeraImagemWorker.Worker.Configurations
                         h.Username(usuario);
                         h.Password(senha);
                     });
+
+                    cfg.UseDelayedMessageScheduler();
 
                     cfg.ReceiveEndpoint(fila, e =>
                     {
@@ -53,17 +44,6 @@ namespace AudioGeraImagemWorker.Worker.Configurations
                 x.AddConsumer<NovoComandoConsumer>();
                 x.AddConsumer<RetentativaComandoConsumer>();
             });
-
-            services.Configure<MassTransitHostOptions>(options =>
-            {
-                options.WaitUntilStarted = true;
-            });
-
-            //services.AddQuartzHostedService(options =>
-            //{
-            //    options.StartDelay = TimeSpan.FromSeconds(5);
-            //    options.WaitForJobsToComplete = true;
-            //});
         }
     }
 }

@@ -51,7 +51,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             }
         }
 
-        public async Task ReprocessarComando(ComandoMessage mensagem)
+        public async Task ReprocessarComando(RetentativaComandoMessage mensagem)
         {
             var comando = await _comandoRepository.Obter(mensagem.ComandoId);
 

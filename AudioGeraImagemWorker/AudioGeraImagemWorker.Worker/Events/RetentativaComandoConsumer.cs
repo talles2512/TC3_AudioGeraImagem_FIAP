@@ -4,7 +4,7 @@ using MassTransit;
 
 namespace AudioGeraImagemWorker.Worker.Events
 {
-    internal class RetentativaComandoConsumer : IConsumer<ComandoMessage>
+    public class RetentativaComandoConsumer : IConsumer<RetentativaComandoMessage>
     {
         private readonly IEventReceiver _eventReceiver;
 
@@ -13,9 +13,10 @@ namespace AudioGeraImagemWorker.Worker.Events
             _eventReceiver = eventReceiver;
         }
 
-        public async Task Consume(ConsumeContext<ComandoMessage> context)
+        public async Task Consume(ConsumeContext<RetentativaComandoMessage> context)
         {
             var mensagem = context.Message;
+
             await _eventReceiver.ReceberRetentativa(mensagem);
         }
     }
