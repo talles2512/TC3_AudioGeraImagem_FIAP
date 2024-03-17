@@ -46,7 +46,9 @@ namespace AudioGeraImagemWorker.Domain.Services
             }
             else
             {
-                await AtualizarProcessamentoComando(comando);
+                if(comando.ProcessamentosComandos.Last()?.Estado is EstadoComando.Recebido)
+                    await AtualizarProcessamentoComando(comando);
+
                 await ExecutarComando(comando, mensagem.Payload);
             }
         }
@@ -60,10 +62,11 @@ namespace AudioGeraImagemWorker.Domain.Services
                 _logger.LogWarning($"[{_className}] - [ReprocessarComando] => Mensagem descartada, pois o comando de id '{mensagem.ComandoId}' não existe.");
             }
 
+            await AtualizarComando(comando, mensagem.UltimoEstado);
             await ExecutarComando(comando, mensagem.Payload);
         }
 
-        public async Task ExecutarComando(Comando comando, byte[] payload = null)
+        private async Task ExecutarComando(Comando comando, byte[] payload = null)
         {
             var ultimoProcessamento = comando.ProcessamentosComandos.LastOrDefault();
 
@@ -99,6 +102,7 @@ namespace AudioGeraImagemWorker.Domain.Services
             {
                 ultimoProcessamento.MensagemErro = ex.Message;
                 await _erroManager.TratarErro(comando, ultimoProcessamento.Estado, payload);
+                await _comandoRepository.Atualizar(comando);
             }
         }
 
@@ -131,11 +135,14 @@ namespace AudioGeraImagemWorker.Domain.Services
                     break;
             }
 
-            comando.InstanteAtualizacao = DateTime.Now;
+            await AtualizarComando(comando, novoEstadoComando);
+        }
 
-            var novoProcessamentoComando = ProcessamentoComandoFactory.Novo(novoEstadoComando);
-
+        private async Task AtualizarComando(Comando comando, EstadoComando estadoComando)
+        {
+            var novoProcessamentoComando = ProcessamentoComandoFactory.Novo(estadoComando);
             comando.ProcessamentosComandos.Add(novoProcessamentoComando);
+            comando.InstanteAtualizacao = novoProcessamentoComando.InstanteCriacao;
 
             await _comandoRepository.Atualizar(comando);
         }

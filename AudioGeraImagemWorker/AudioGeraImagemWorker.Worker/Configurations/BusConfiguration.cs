@@ -8,11 +8,13 @@ namespace AudioGeraImagemWorker.Worker.Configurations
     {
         public static void AddBusConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
-            var fila = configuration.GetSection("MassTransit")["NomeFila"] ?? string.Empty;
-            var filaRetentativa = configuration.GetSection("MassTransit")["NomeFilaRetentativa"] ?? string.Empty;
-            var servidor = configuration.GetSection("MassTransit")["Servidor"] ?? string.Empty;
-            var usuario = configuration.GetSection("MassTransit")["Usuario"] ?? string.Empty;
-            var senha = configuration.GetSection("MassTransit")["Senha"] ?? string.Empty;
+            var massTransitParameters = configuration.GetRequiredSection("MassTransit");
+
+            var fila = massTransitParameters["Fila"] ?? string.Empty;
+            var filaRetentativa = massTransitParameters["FilaRetentativa"] ?? string.Empty;
+            var servidor = massTransitParameters["Servidor"] ?? string.Empty;
+            var usuario = massTransitParameters["Usuario"] ?? string.Empty;
+            var senha = massTransitParameters["Senha"] ?? string.Empty;
 
             services.AddMassTransit(x =>
             {

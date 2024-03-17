@@ -11,15 +11,15 @@ namespace AudioGeraImagemAPI.Domain.Services
 {
     public class ComandoService : IComandoService
     {
-        readonly IComandoRepository _repository;
-        readonly IBus _bus;
-        string queueName;
+        private readonly IComandoRepository _repository;
+        private readonly IBus _bus;
+        private string nomeFila;
 
         public ComandoService(IComandoRepository repository, IBus bus, IConfiguration configuration)
         {
             _repository = repository;
             _bus = bus;
-            queueName = configuration.GetSection("MassTransit")["NomeFila"] ?? string.Empty;
+            nomeFila = configuration.GetRequiredSection("MassTransit")["Fila"] ?? string.Empty;
         }
 
         public async Task GerarImagem(Comando comando, IFormFile arquivo)
@@ -54,7 +54,7 @@ namespace AudioGeraImagemAPI.Domain.Services
 
         private async Task PublicarMensagem(ComandoMessage mensagem)
         {
-            var endpoint = await _bus.GetSendEndpoint(new Uri($"queue:{queueName}"));
+            var endpoint = await _bus.GetSendEndpoint(new Uri($"queue:{nomeFila}"));
             await endpoint.Send(mensagem);
         }
 

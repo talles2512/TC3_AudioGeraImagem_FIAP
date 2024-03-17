@@ -14,6 +14,7 @@
 
 	<ItemGroup>
 	  <Compile Include="Vendor\BucketManager.cs" />
+	  <Compile Include="Vendor\Entities\AzureBlob\AzureBlobParameters.cs" />
 	  <Compile Include="Vendor\Entities\OpenAI\OpenAIParameters.cs" />
 	  <Compile Include="Vendor\Entities\OpenAI\Response\ErrorResponse.cs" />
 	  <Compile Include="Vendor\Entities\OpenAI\Response\GerarImagemResponse.cs" />

@@ -48,6 +48,12 @@ namespace AudioGeraImagemWorker.Domain.Utility
                 return await ExternalIntegration(url, VerboHttp.Get, string.Empty);
             });
 
+            if (!result.IsSuccessStatusCode)
+            {
+                var content = await result.Content.ReadAsStringAsync();
+                throw new Exception($"{result.StatusCode} - {content}");
+            }
+
             return await result.Content.ReadAsByteArrayAsync();
         }
 

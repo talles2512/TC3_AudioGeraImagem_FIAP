@@ -1,25 +1,23 @@
 ﻿using AudioGeraImagemWorker.Domain.Interfaces.Vendor;
+using AudioGeraImagemWorker.Infra.Vendor.Entities.AzureBlob;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Microsoft.Extensions.Configuration;
 
 namespace AudioGeraImagemWorker.Infra.Vendor
 {
     public class BucketManager : IBucketManager
     {
-        private readonly string containerName;
-        private readonly string connectionString;
+        private readonly AzureBlobParameters _parameters;
 
-        public BucketManager(IConfiguration configuration)
+        public BucketManager(AzureBlobParameters parameters)
         {
-            containerName = configuration.GetSection("AzureBlobConfiguration")["ContainerName"] ?? string.Empty;
-            connectionString = configuration.GetSection("AzureBlobConfiguration")["ConnectionString"] ?? string.Empty;
+            _parameters = parameters;
         }
 
         private async Task<BlobClient> GetBlobClient(string blobName)
         {
-            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
-            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            BlobServiceClient blobServiceClient = new BlobServiceClient(_parameters.ConnectionString);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(_parameters.ContainerName);
             await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
             return containerClient.GetBlobClient(blobName);
         }
@@ -27,9 +25,7 @@ namespace AudioGeraImagemWorker.Infra.Vendor
         public async Task<string> ArmazenarObjeto(byte[] bytes, string blobName)
         {
             var blobClient = await GetBlobClient(blobName);
-
-            await blobClient.UploadAsync(BinaryData.FromBytes(bytes));
-
+            await blobClient.UploadAsync(BinaryData.FromBytes(bytes), overwrite: true);
             return blobClient.Uri.ToString();
         }
     }
