@@ -26,12 +26,12 @@ namespace AudioGeraImagemAPI.API.Controllers
             {
                 _logger.LogInformation($"[{ClassName}] - [GerarImagem] => Request.: {gerarImagem.Descricao} - {gerarImagem.Arquivo.FileName}");
 
-                var (sucesso, resultado) = await _applicationService.GerarImagem(gerarImagem);
+                var resultado = await _applicationService.GerarImagem(gerarImagem);
 
-                if(sucesso)
-                    return Accepted(string.Empty, resultado);
-                else
-                    return BadRequest(resultado);
+                if(resultado.Sucesso)
+                    return Accepted(string.Empty, resultado.Objeto);
+                
+                return BadRequest(resultado.MensagemErro);
             }
             catch (Exception ex)
             {
@@ -47,9 +47,12 @@ namespace AudioGeraImagemAPI.API.Controllers
             {
                 _logger.LogInformation($"[{ClassName}] - [BuscarCriacoes] => Request.: {new { Busca = busca }}");
 
-                var criacoes = await _applicationService.BuscarCriacoes(busca);
+                var resultado = await _applicationService.BuscarCriacoes(busca);
 
-                return Ok(criacoes);
+                if (resultado.Sucesso)
+                    return Ok(resultado.Objeto);
+
+                return NotFound(resultado.MensagemErro);
             }
             catch (Exception ex)
             {
@@ -65,15 +68,37 @@ namespace AudioGeraImagemAPI.API.Controllers
             {
                 _logger.LogInformation($"[{ClassName}] - [ObterCriacao] => Request.: {new { Id = id }}");
 
-                var (sucesso, resultado) = await _applicationService.ObterCriacao(id);
+                var resultado = await _applicationService.ObterCriacao(id);
 
-                if (sucesso)
-                    return Ok(resultado);
-                else
-                    return NotFound("Criação não encontrada.");
+                if (resultado.Sucesso)
+                    return Ok(resultado.Objeto);
+
+                return NotFound(resultado.MensagemErro);
             }
             catch (Exception ex)
             {
+                _logger.LogError($"[{ClassName}] - [ObterCriacao] => Exception.: {ex.Message}");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("obter-imagem/{id}")]
+        public async Task<IActionResult> ObterImagem(string id)
+        {
+            try
+            {
+                _logger.LogInformation($"[{ClassName}] - [ObterImagem] => Request.: {new { Id = id }}");
+
+                var resultado = await _applicationService.ObterImagem(id);
+
+                if (resultado.Sucesso)
+                    return File(resultado.Objeto, "image/jpeg");
+
+                return BadRequest(resultado.MensagemErro);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[{ClassName}] - [ObterImagem] => Exception.: {ex.Message}");
                 return StatusCode(500, ex.Message);
             }
         }
