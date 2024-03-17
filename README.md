@@ -33,9 +33,9 @@ a tarefa é marcada como 'Falha' e finalizada.
 <h4 align="left">1. RabbitMQ</h4>
 - ➤ Requisitos.: Docker Desktop instalado e em execução em seu sistema.</br>
 - ➤ 1. Abra um terminal ou prompt de comando.</br>
-- ➤ 2. Execute o comando.: <code>docker pull rabbitmq</code></br>
+- ➤ 2. Execute o comando.: <code>docker pull masstransit/rabbitmq</code></br>
 - ➤ 3. Aguarde a instalação da imagem.</br>
-- ➤ 4. Execute o comando.: <code>docker run -d --name meu-rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq</code></br>
+- ➤ 4. Execute o comando.: <code>docker run -d --name meu-rabbitmq -p 5672:5672 -p 15672:15672 masstransit/rabbitmq</code></br>
 
 <h4 align="left">2. Azure Storage Accontou BLOB</h4>
 - ➤ Requisitos.: Uma conta cadastrada no portal do Azure.</br>
