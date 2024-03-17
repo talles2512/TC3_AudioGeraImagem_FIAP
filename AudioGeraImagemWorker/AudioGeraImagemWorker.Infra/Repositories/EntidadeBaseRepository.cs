@@ -1,11 +1,6 @@
 ﻿using AudioGeraImagemWorker.Domain.Entities;
 using AudioGeraImagemWorker.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AudioGeraImagemWorker.Infra.Repositories
 {
@@ -38,7 +33,7 @@ namespace AudioGeraImagemWorker.Infra.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<TEntidade> Obter(string id)
+        public async Task<TEntidade> Obter(Guid id)
         {
             return await _dbSet.FindAsync(id);
         }

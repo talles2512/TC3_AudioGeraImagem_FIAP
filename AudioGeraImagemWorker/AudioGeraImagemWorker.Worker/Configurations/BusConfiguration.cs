@@ -1,10 +1,6 @@
 ﻿using AudioGeraImagemWorker.Worker.Events;
 using MassTransit;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Quartz;
 
 namespace AudioGeraImagemWorker.Worker.Configurations
 {
@@ -12,14 +8,19 @@ namespace AudioGeraImagemWorker.Worker.Configurations
     {
         public static void AddBusConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
-            var fila = configuration.GetSection("MassTransit")["NomeFila"] ?? string.Empty;
-            var servidor = configuration.GetSection("MassTransit")["Servidor"] ?? string.Empty;
-            var usuario = configuration.GetSection("MassTransit")["Usuario"] ?? string.Empty;
-            var senha = configuration.GetSection("MassTransit")["Senha"] ?? string.Empty;
+            var massTransitParameters = configuration.GetRequiredSection("MassTransit");
 
-            services.AddMassTransit(config =>
+            var fila = massTransitParameters["Fila"] ?? string.Empty;
+            var filaRetentativa = massTransitParameters["FilaRetentativa"] ?? string.Empty;
+            var servidor = massTransitParameters["Servidor"] ?? string.Empty;
+            var usuario = massTransitParameters["Usuario"] ?? string.Empty;
+            var senha = massTransitParameters["Senha"] ?? string.Empty;
+
+            services.AddMassTransit(x =>
             {
-                config.UsingRabbitMq((context, cfg) =>
+                x.AddDelayedMessageScheduler();
+
+                x.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(servidor, "/", h =>
                     {
@@ -27,15 +28,23 @@ namespace AudioGeraImagemWorker.Worker.Configurations
                         h.Password(senha);
                     });
 
+                    cfg.UseDelayedMessageScheduler();
+
                     cfg.ReceiveEndpoint(fila, e =>
                     {
-                        e.Consumer<ComandoConsumer>();
+                        e.ConfigureConsumer<NovoComandoConsumer>(context);
+                    });
+
+                    cfg.ReceiveEndpoint(filaRetentativa, e =>
+                    {
+                        e.ConfigureConsumer<RetentativaComandoConsumer>(context);
                     });
 
                     cfg.ConfigureEndpoints(context);
                 });
 
-                config.AddConsumer<ComandoConsumer>();
+                x.AddConsumer<NovoComandoConsumer>();
+                x.AddConsumer<RetentativaComandoConsumer>();
             });
         }
     }

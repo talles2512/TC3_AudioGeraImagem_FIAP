@@ -1,4 +1,5 @@
-﻿using AudioGeraImagemWorker.Domain.Entities;
+﻿using AudioGeraImagem.Domain.Entities;
+using AudioGeraImagemWorker.Domain.Entities;
 using AudioGeraImagemWorker.Infra.Configurations;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +9,6 @@ namespace AudioGeraImagemWorker.Infra
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-
         }
 
         public DbSet<Comando> Comandos { get; set; }

@@ -1,11 +1,7 @@
-﻿using AudioGeraImagemWorker.Domain.Entities;
+﻿using AudioGeraImagem.Domain.Entities;
+using AudioGeraImagemWorker.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AudioGeraImagemWorker.Infra.Configurations
 {
@@ -15,18 +11,28 @@ namespace AudioGeraImagemWorker.Infra.Configurations
         {
             builder.ToTable("Comandos");
             builder.HasKey(x => x.Id);
+            builder.Property(x => x.Descricao)
+                .HasColumnType("VARCHAR(256)");
+            builder.Ignore(x => x.Payload);
             builder.Property(x => x.InstanteCriacao)
-                .HasColumnType("DATETIME");
+                .HasColumnType("DATETIME2");
             builder.Property(x => x.InstanteAtualizacao)
-                .HasColumnType("DATETIME");
+                .HasColumnType("DATETIME2");
+            builder.Property(x => x.UrlAudio)
+                .HasColumnType("VARCHAR(MAX)");
+            builder.Property(x => x.Transcricao)
+                .HasColumnType("VARCHAR(MAX)");
+            builder.Property(x => x.UrlImagem)
+                .HasColumnType("VARCHAR(MAX)");
 
             builder.OwnsMany(x => x.ProcessamentosComandos, procesamentoComando =>
             {
                 procesamentoComando.ToTable("ProcessamentoComandos");
+                procesamentoComando.HasKey(x => x.Id);
                 procesamentoComando.Property(x => x.Estado).HasConversion<string>()
                     .HasColumnType("VARCHAR(20)");
                 procesamentoComando.Property(x => x.InstanteCriacao)
-                    .HasColumnType("DATETIME");
+                    .HasColumnType("DATETIME2");
                 procesamentoComando.Property(x => x.MensagemErro)
                     .HasColumnType("VARCHAR(256)");
             });

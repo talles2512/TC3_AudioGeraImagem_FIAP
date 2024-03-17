@@ -1,13 +1,15 @@
-﻿using AudioGeraImagemWorker.Domain.Enums;
-using System.Text.Json.Serialization;
+﻿using AudioGeraImagemWorker.Domain.Entities;
+using MassTransit;
 
-namespace AudioGeraImagemWorker.Domain.Entities
+namespace AudioGeraImagem.Domain.Entities
 {
+    [EntityName("Comando")]
     public class Comando : EntidadeBase
     {
+        public string Descricao { get; set; }
         public byte[] Payload { get; set; }
         public string UrlAudio { get; set; }
-        public string TextoProcessado { get; set; }
+        public string Transcricao { get; set; }
         public string UrlImagem { get; set; }
         public DateTime InstanteCriacao { get; set; }
         public DateTime InstanteAtualizacao { get; set; }

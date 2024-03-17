@@ -6,9 +6,11 @@ namespace AudioGeraImagemAPI.API.Configurations
     {
         public static void AddBusConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
-            var servidor = configuration.GetSection("MassTransit")["Servidor"] ?? string.Empty;
-            var usuario = configuration.GetSection("MassTransit")["Usuario"] ?? string.Empty;
-            var senha = configuration.GetSection("MassTransit")["Senha"] ?? string.Empty;
+            var massTransitParameters = configuration.GetRequiredSection("MassTransit");
+
+            var servidor = massTransitParameters["Servidor"] ?? string.Empty;
+            var usuario = massTransitParameters["Usuario"] ?? string.Empty;
+            var senha = massTransitParameters["Senha"] ?? string.Empty;
 
             services.AddMassTransit(cfg =>
             {

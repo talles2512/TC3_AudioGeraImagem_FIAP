@@ -1,26 +1,46 @@
-﻿using AudioGeraImagemWorker.Application.Interfaces;
-using AudioGeraImagemWorker.Domain.Entities;
+﻿using AudioGeraImagem.Domain.Messages;
+using AudioGeraImagemWorker.Application.Interfaces;
 using AudioGeraImagemWorker.Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AudioGeraImagemWorker.Domain.Services;
+using Microsoft.Extensions.Logging;
 
 namespace AudioGeraImagemWorker.Application.Services
 {
     public class EventReceiver : IEventReceiver
     {
         private readonly IComandoManager _comandoManager;
+        private readonly ILogger<ComandoManager> _logger;
+        private readonly string _className = typeof(ComandoManager).Name;
 
-        public EventReceiver(IComandoManager comandoManager)
+        public EventReceiver(IComandoManager comandoManager,
+                             ILogger<ComandoManager> logger)
         {
             _comandoManager = comandoManager;
+            _logger = logger;
         }
 
-        public async Task ReceberEvento(Comando comando)
+        public async Task ReceberMensagem(ComandoMessage mensagem)
         {
-            await _comandoManager.ProcessarComando(comando);
+            try
+            {
+                await _comandoManager.ProcessarComando(mensagem);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[{_className}] - [ReceberMensagem] => Exception.: {ex.Message}");
+            }
+        }
+
+        public async Task ReceberRetentativa(RetentativaComandoMessage mensagem)
+        {
+            try
+            {
+                await _comandoManager.ReprocessarComando(mensagem);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"[{_className}] - [ReceberRetentativa] => Exception.: {ex.Message}");
+            }
         }
     }
 }

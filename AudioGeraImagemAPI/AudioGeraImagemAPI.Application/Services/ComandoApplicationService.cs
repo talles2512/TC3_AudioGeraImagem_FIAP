@@ -1,7 +1,11 @@
-﻿using AudioGeraImagemAPI.Application.Intefaces;
+﻿using AudioGeraImagemAPI.Application.Factory;
+using AudioGeraImagemAPI.Application.Intefaces;
+using AudioGeraImagemAPI.Application.ViewModels;
 using AudioGeraImagemAPI.Domain.Entities;
 using AudioGeraImagemAPI.Domain.Enums;
 using AudioGeraImagemAPI.Domain.Interfaces;
+using AudioGeraImagemAPI.Domain.Utility.DTO;
+using AudioGeraImagemAPI.Domain.Utility.Factory;
 
 namespace AudioGeraImagemAPI.Application.Services
 {
@@ -14,39 +18,64 @@ namespace AudioGeraImagemAPI.Application.Services
             _service = service;
         }
 
-        public async Task<string> CriarImagem(Stream stream)
+        public async Task<ResultadoOperacao<List<ListarCriacaoViewModel>>> BuscarCriacoes(string busca)
         {
-            var bytes = ObterBytes(stream);
-            var comando = CriarComando(bytes);
+            List<ListarCriacaoViewModel> listaCriacoes = new();
 
-            return await _service.CriarImagem(comando);
+            var resultado = await _service.Buscar(busca);
+
+            if (!resultado.Sucesso)
+                return ResultadoOperacaoFactory.Criar(false, resultado.MensagemErro, listaCriacoes);
+
+            listaCriacoes.AddRange(resultado.Objeto.Select(ViewModelFactory.CriarListarCriacoesViewModel));
+
+            return ResultadoOperacaoFactory.Criar(true, string.Empty, listaCriacoes);
         }
 
-        public async Task<ICollection<Comando>> ListarCriacoes(string busca)
+        public async Task<ResultadoOperacao<ObterCriacaoViewModel>> ObterCriacao(string id)
         {
-            return await _service.ListarCriacoes(busca);
+            var resultado = await _service.ObterComando(id);
+
+            if(!resultado.Sucesso)
+                return ResultadoOperacaoFactory.Criar(false, resultado.MensagemErro, new ObterCriacaoViewModel());
+
+            return ResultadoOperacaoFactory.Criar(true, string.Empty, ViewModelFactory.CriarObterCriacaoViewModel(resultado.Objeto));
         }
 
-        public Task ObterImagem(string id)
+        public async Task<ResultadoOperacao<Stream>> ObterImagem(string id)
         {
-            throw new NotImplementedException();
+            return await _service.ObterImagem(id);
         }
 
-        private byte[] ObterBytes(Stream stream)
+        public async Task<ResultadoOperacao<Guid>> GerarImagem(GerarImagemViewModel gerarImagem)
         {
-            using var memoryStream = new MemoryStream();
-            stream.CopyTo(memoryStream);
-            var bytes = memoryStream.ToArray();
+            if (!RequisicaoValida(gerarImagem))
+                return ResultadoOperacaoFactory.Criar(false, "Escreva uma descrição com até 256 caracteres e o arquivo deve ser .mp3", Guid.Empty);
 
-            return bytes;
+            var comando = CriarComando(gerarImagem);
+
+            await _service.GerarImagem(comando, gerarImagem.Arquivo);
+
+            return ResultadoOperacaoFactory.Criar(true, string.Empty, comando.Id);
         }
 
-        private Comando CriarComando(byte[] bytes)
+        private bool RequisicaoValida(GerarImagemViewModel gerarImagem)
+        {
+            if (gerarImagem.Descricao.Length > 256)
+                return false;
+
+            if (!gerarImagem.Arquivo.ContentType.Contains("audio/mpeg"))
+                return false;
+
+            return true;
+        }
+
+        private Comando CriarComando(GerarImagemViewModel gerarImagem)
         {
             var comando = new Comando()
             {
                 Id = Guid.NewGuid(),
-                Payload = bytes,
+                Descricao = gerarImagem.Descricao,
                 InstanteCriacao = DateTime.Now,
                 ProcessamentosComandos = new()
             };
