@@ -33,7 +33,7 @@ a tarefa é marcada como 'Falha' e finalizada.
 <h4 align="left">1. RabbitMQ</h4>
 - ➤ Requisitos.: Docker Desktop instalado e em execução em seu sistema.</br>
 - ➤ 1. Abra um terminal ou prompt de comando.</br>
-- ➤ 2. Execute o comando.: <code>docker pull masstransit/rabbitmq</code></br>
+- ➤ 2. Execute o comando.: <code>docker pull masstransit/rabbitmq:latest</code></br>
 - ➤ 3. Aguarde a instalação da imagem.</br>
 - ➤ 4. Execute o comando.: <code>docker run -d --name meu-rabbitmq -p 5672:5672 -p 15672:15672 masstransit/rabbitmq</code></br>
 
@@ -51,7 +51,7 @@ pois iremos utilizar posteriormente na configuração do Worker).</br>
 
 <h4 align="left">3. AudioGeraImagemAPI</h4>
 ➤ Existem alguns passos iniciais antes de começar utilizar o projeto, primeiramente é importante verificar o arquivo de configuração 
-da API (appsettings.json) e lá tem algumas informações importantes que devemos prestar atenção.: </br>
+da API (<code>appsettings.json</code> ou <code>appsettings.Development.json</code>) e lá tem algumas informações importantes que devemos prestar atenção.: </br>
 - ➤ <i>ConnectionStrings:ApplicationConnectionString</i>.: String de conexão do banco de dados.</br>
 - ➤ <i>MassTransit:NomeFila</i>.: Defina aqui o nome da fila na qual a API publicará mensagens no RabbitMQ. 
 É importante observar que este nome deve corresponder ao definido no Worker.</br>
@@ -65,6 +65,8 @@ usuário, se você estiver usando um ambiente diferente do local, é necessário
 senha personalizada, pois a senha padrão "guest" não funcionará.</br>
 
 <h4 align="left">4. AudioGeraImagemWorker</h4>
+➤ Existem alguns passos iniciais antes de começar utilizar o projeto, primeiramente é importante verificar o arquivo de configuração 
+do Worker (<code>appsettings.json</code> ou <code>appsettings.Development.json</code>) e lá tem algumas informações importantes que devemos prestar atenção.: </br>
 - ➤ <i>ConnectionStrings:ApplicationConnectionString</i>.: String de conexão do banco de dados (Igual a string de conexão da API).</br>
 - ➤ <i>MassTransit:NomeFila</i>.: Defina aqui o mesmo nome da fila fornecido na API, para que seja possível o Worker conseguir fazer seu papel de consumidor.</br>
 - ➤ <i>MassTransit:Servidor</i>.: Especifique o servidor onde o RabbitMQ está em execução. 
@@ -83,14 +85,19 @@ senha personalizada, pois a senha padrão "guest" não funcionará.</br>
 ➤ Executar o seguinte script na base de dados.: <a href="https://github.com/talles2512/TC3_AudioGeraImagem_FIAP/blob/developer/Documenta%C3%A7%C3%B5es/Tabelas/script%20tabelas.sql">Script das Tabelas</a></br>
 
 <h4 align="left">Iniciando o projeto</h4>
-➤ Realizado todas as configurações, ambos projetos devem ser iniciados. Após esse processo, é possível realizar testes com áudios previamente gravados.: DISPONIBILIZAR DEPOIS.
+➤ Realizado todas as configurações, ambos projetos devem ser iniciados. Após esse processo, é possível realizar testes com áudios previamente gravados.: <a href="https://github.com/talles2512/TC3_AudioGeraImagem_FIAP/tree/developer/Documenta%C3%A7%C3%B5es/%C3%81udios%20de%20exemplo"> Áudios de Exemplo</a>.</br>
+➤ Swagger para testar a API.: <code>https://localhost:[porta]/swagger/index.html</code></br>
+
+<img width="1200" src="https://github.com/talles2512/TC3_AudioGeraImagem_FIAP/blob/developer/Documenta%C3%A7%C3%B5es/Util/SwaggerAPI.png"></img></br>
+<img width="1200" src="https://github.com/talles2512/TC3_AudioGeraImagem_FIAP/blob/developer/Documenta%C3%A7%C3%B5es/Util/GerandoImagemSwaggerAPI.png"></img></br>
+<img width="1200" src="https://github.com/talles2512/TC3_AudioGeraImagem_FIAP/blob/developer/Documenta%C3%A7%C3%B5es/Util/ObtendoImagemSwaggerAPI.png"></img></br>
 
 <h4 align="left">Diagrama do banco de dados</h4>
-<img width="1200" src="https://github.com/talles2512/TC3_AudioGeraImagem_FIAP/blob/consumidor/audio-gera-imagem-worker/Documenta%C3%A7%C3%B5es/Tabelas/diagramaServices.png"></img>
+<img width="1200" src="https://github.com/talles2512/TC3_AudioGeraImagem_FIAP/blob/developer/Documenta%C3%A7%C3%B5es/Tabelas/diagramaServices.png"></img>
 
 <h4 align="left">Diagrama de funcionamento dos microsserviços</h4>
 <img width="1200" src="https://github.com/talles2512/TC3_AudioGeraImagem_FIAP/blob/consumidor/audio-gera-imagem-worker/Documenta%C3%A7%C3%B5es/Diagramas/TC3.drawio.png"></img>
 
 <h4 align="left">Documentações</h4>
-<a href="https://github.com/talles2512/TC3_AudioGeraImagem_FIAP/blob/consumidor/audio-gera-imagem-worker/Documenta%C3%A7%C3%B5es/Tabelas/Descritivo%20das%20Tabelas.txt">Tabelas</a></br>
+<a href="https://github.com/talles2512/TC3_AudioGeraImagem_FIAP/blob/developer/Documenta%C3%A7%C3%B5es/Tabelas/Descritivo%20das%20Tabelas.txt">Descritivo das Tabelas do Projeto</a>.</br>
 
