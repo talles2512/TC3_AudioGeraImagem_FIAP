@@ -78,7 +78,9 @@ senha personalizada, pois a senha padrão "guest" não funcionará.</br>
 - ➤ <i>AzureBlobConfiguration:ConnectionString</i>.: Insira aqui a string de conexão que você copiou ou salvou após criar a conta de armazenamento do azure.</br>
 - ➤ <i>AzureBlobConfiguration:ContainerName</i>.: Defina qual o nome desejado para a criação automática do contêiner</br>
 - ➤ <i>OpenAI:SecretKey</i>.: Chave secreta para o consumo das APIS do OpenAI.</br>
-- ➤ <b>IMPORTATNE</b>.: Após finalizar no Package Manager Console rodar o comando.: <code>Update-Database</code>.</br>
+
+<h4 align="left">5. Scripts de Banco de Dados</h4>
+➤ Executar o seguinte script na base de dados.: <a href="https://github.com/talles2512/TC3_AudioGeraImagem_FIAP/blob/developer/Documenta%C3%A7%C3%B5es/Tabelas/script%20tabelas.sql">Script das Tabelas</a></br>
 
 <h4 align="left">Iniciando o projeto</h4>
 ➤ Realizado todas as configurações, ambos projetos devem ser iniciados. Após esse processo, é possível realizar testes com áudios previamente gravados.: DISPONIBILIZAR DEPOIS.
