@@ -7,7 +7,7 @@ __EFMigrationsHistory: tabela de controle do EFCore
 ------------------------
 
 Comandos.: Tabela responsável por armazenar o comando
-enviado pelo publicador e ir atualizando nos direntes
+enviado pelo publicador e ir atualizando nos diferentes
 tipos de estados no consumidor (worker).
 	Id (uniqueidentifier) .: Identificar do comando (GUID).
 	UrlAudio (varchar(MAX)) .: URL do áudio armazenado no S3.
