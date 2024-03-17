@@ -13,7 +13,6 @@ namespace AudioGeraImagemWorker.Infra.Configurations
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Descricao)
                 .HasColumnType("VARCHAR(256)");
-            builder.Ignore(x => x.Payload);
             builder.Property(x => x.InstanteCriacao)
                 .HasColumnType("DATETIME2");
             builder.Property(x => x.InstanteAtualizacao)
