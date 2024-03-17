@@ -17,17 +17,19 @@ namespace AudioGeraImagemAPI.Infra.Configurations
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Descricao)
                 .HasColumnType("VARCHAR(256)");
-            builder.Ignore(x => x.Payload);
             builder.Property(x => x.InstanteCriacao)
                 .HasColumnType("DATETIME2");
             builder.Property(x => x.InstanteAtualizacao)
                 .HasColumnType("DATETIME2");
             builder.Property(x => x.UrlAudio)
-                .HasColumnType("VARCHAR(MAX)");
+                .HasColumnType("VARCHAR(MAX)")
+                .IsRequired(false);
             builder.Property(x => x.Transcricao)
-                .HasColumnType("VARCHAR(MAX)");
+                .HasColumnType("VARCHAR(MAX)")
+                .IsRequired(false);
             builder.Property(x => x.UrlImagem)
-                .HasColumnType("VARCHAR(MAX)");
+                .HasColumnType("VARCHAR(MAX)")
+                .IsRequired(false);
 
             builder.OwnsMany(x => x.ProcessamentosComandos, procesamentoComando =>
             {
@@ -38,7 +40,8 @@ namespace AudioGeraImagemAPI.Infra.Configurations
                 procesamentoComando.Property(x => x.InstanteCriacao)
                     .HasColumnType("DATETIME2");
                 procesamentoComando.Property(x => x.MensagemErro)
-                    .HasColumnType("VARCHAR(256)");
+                    .HasColumnType("VARCHAR(256)")
+                    .IsRequired(false);
             });
         }
     }

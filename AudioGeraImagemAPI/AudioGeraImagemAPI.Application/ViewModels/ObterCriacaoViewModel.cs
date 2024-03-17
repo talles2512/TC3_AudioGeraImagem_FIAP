@@ -1,7 +1,15 @@
-﻿namespace AudioGeraImagemAPI.Domain.Entities
+﻿using AudioGeraImagemAPI.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AudioGeraImagemAPI.Application.ViewModels
 {
-    public class Comando : EntidadeBase
+    public class ObterCriacaoViewModel
     {
+        public Guid Id { get; set; }
         public string Descricao { get; set; }
         public string UrlAudio { get; set; }
         public string Transcricao { get; set; }

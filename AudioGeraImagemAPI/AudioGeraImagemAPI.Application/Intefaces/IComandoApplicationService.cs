@@ -11,7 +11,7 @@ namespace AudioGeraImagemAPI.Application.Intefaces
     public interface IComandoApplicationService
     {
         Task<Tuple<bool, string>> GerarImagem(GerarImagemViewModel gerarImagem);
-        Task<ICollection<Comando>> ListarCriacoes(string busca);
-        Task ObterImagem(string id);
+        Task<ICollection<ListarCriacaoViewModel>> BuscarCriacoes(string busca);
+        Task<Tuple<bool, ObterCriacaoViewModel>> ObterCriacao(string id);
     }
 }

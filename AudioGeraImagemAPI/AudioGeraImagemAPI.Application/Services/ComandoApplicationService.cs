@@ -1,9 +1,9 @@
-﻿using AudioGeraImagemAPI.Application.Intefaces;
+﻿using AudioGeraImagemAPI.Application.Factory;
+using AudioGeraImagemAPI.Application.Intefaces;
 using AudioGeraImagemAPI.Application.ViewModels;
 using AudioGeraImagemAPI.Domain.Entities;
 using AudioGeraImagemAPI.Domain.Enums;
 using AudioGeraImagemAPI.Domain.Interfaces;
-using System.Net.Mime;
 
 namespace AudioGeraImagemAPI.Application.Services
 {
@@ -16,14 +16,34 @@ namespace AudioGeraImagemAPI.Application.Services
             _service = service;
         }
 
-        public async Task<ICollection<Comando>> ListarCriacoes(string busca)
+        public async Task<ICollection<ListarCriacaoViewModel>> BuscarCriacoes(string busca)
         {
-            return await _service.ListarCriacoes(busca);
+            List<Comando> listaComandos = new List<Comando>();
+
+            if (string.IsNullOrEmpty(busca))
+            {
+                var retorno = await _service.ObterComandosProcessamentos();
+                listaComandos.AddRange(retorno.ToList());
+            }
+            else
+            {
+                var retorno = await _service.Buscar(busca);
+                listaComandos.AddRange(retorno.ToList());
+            }
+
+            var listaCriacoesViewModels = listaComandos.Select(ViewModelFactory.CriarListarCriacoesViewModel).ToList();
+
+            return listaCriacoesViewModels;
         }
 
-        public Task ObterImagem(string id)
+        public async Task<Tuple<bool, ObterCriacaoViewModel>> ObterCriacao(string id)
         {
-            throw new NotImplementedException();
+            var comando = await _service.ObterComando(id);
+
+            if(comando == null)
+                return Tuple.Create(false, new ObterCriacaoViewModel());
+
+            return Tuple.Create(true, ViewModelFactory.CriarObterCriacaoViewModel(comando));
         }
 
         public async Task<Tuple<bool, string>> GerarImagem(GerarImagemViewModel gerarImagem)

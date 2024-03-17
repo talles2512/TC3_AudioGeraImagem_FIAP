@@ -58,14 +58,18 @@ namespace AudioGeraImagemAPI.Domain.Services
             await endpoint.Send(mensagem);
         }
 
-        public async Task<ICollection<Comando>> ListarCriacoes(string busca)
+        public async Task<Comando> ObterComando(string id)
         {
-            return await _repository.ObterTodos();
+            return await _repository.ObterComandoProcessamentos(id);
+        }
+        public async Task<ICollection<Comando>> ObterComandosProcessamentos()
+        {
+            return await _repository.ObterComandosProcessamentos();
         }
 
-        public Task ObterImagem(string id)
+        public async Task<ICollection<Comando>> Buscar(string busca)
         {
-            throw new NotImplementedException();
+            return await _repository.Buscar(x => x.Descricao.Contains(busca) || x.Transcricao.Contains(busca));
         }
     }
 }

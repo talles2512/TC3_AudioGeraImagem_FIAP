@@ -6,7 +6,8 @@ namespace AudioGeraImagemAPI.Domain.Interfaces
     public interface IComandoService
     {
         Task GerarImagem(Comando comando, IFormFile arquivo);
-        Task<ICollection<Comando>> ListarCriacoes(string busca);
-        Task ObterImagem(string id);
+        Task<Comando> ObterComando(string id);
+        Task<ICollection<Comando>> ObterComandosProcessamentos();
+        Task<ICollection<Comando>> Buscar(string busca);
     }
 }
